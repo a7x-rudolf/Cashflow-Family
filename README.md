@@ -47,7 +47,7 @@ Project ini membutuhkan file konfigurasi Firebase (`app/google-services.json`) d
 
 Ready to Download & install
 
-📥 [**Download APK (v1.0.0)**](https://github.com/a7x-rudolf/Cashflow-Family/releases/latest)
+[📥 [**Download APK (v1.0.0)**](https://github.com/a7x-rudolf/Cashflow-Family/releases/latest)](https://github.com/a7x-rudolf/Cashflow-Family/releases/download/v1.0.0/Cashflow.Family.apk)
 
 ## License
 
