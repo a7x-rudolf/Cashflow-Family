@@ -29,9 +29,27 @@ Project ini membutuhkan file konfigurasi Firebase (`app/google-services.json`) d
 2. Download `google-services.json` dan taruh di folder `app/`
 3. Isi `local.properties` dengan lokasi Android SDK kamu
 
+## Tampilan Aplikasi
+
+| Beranda | Riwayat Transaksi | Tambah Transaksi |
+|---|---|---|
+| ![Beranda](docs/screenshots/beranda.jpeg) | ![Riwayat](docs/screenshots/riwayat.jpeg) | ![Tambah Transaksi](docs/screenshots/tambah-transaksi.jpeg) |
+
+| Budget Bulanan | Transaksi Berulang | Keluarga |
+|---|---|---|
+| ![Budget](docs/screenshots/budget.jpeg) | ![Recurring](docs/screenshots/recurring.jpeg) | ![Keluarga](docs/screenshots/keluarga.jpeg) |
+
+| Setelan | Promo |
+|---|---|
+| ![Setelan](docs/screenshots/setelan.jpeg) | ![Promo](docs/screenshots/promo.jpeg) |
+
 ## Status
 
 Masih dalam pengembangan aktif — sedang fase redesign UI/UX per halaman.
+
+## License
+
+Lihat file [LICENSE](LICENSE). Kode ini bisa dilihat siapa saja untuk keperluan portofolio/referensi, tapi **tidak boleh dipakai ulang, dimodifikasi, atau didistribusikan** tanpa izin tertulis dari pemilik.
 
 ---
 
