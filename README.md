@@ -53,4 +53,4 @@ Lihat file [LICENSE](LICENSE). Kode ini bisa dilihat siapa saja untuk keperluan 
 
 ---
 
-Dibuat oleh [a7x-rudolf](https://github.com/a7x-rudolf)
+Dibuat oleh [Ridolf Widi Alfisa Lumba](https://github.com/a7x-rudolf)
