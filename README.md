@@ -45,7 +45,7 @@ Project ini membutuhkan file konfigurasi Firebase (`app/google-services.json`) d
 
 ## Status
 
-Masih dalam pengembangan aktif — sedang fase redesign UI/UX per halaman.
+Ready to Download & install
 
 ## License
 
