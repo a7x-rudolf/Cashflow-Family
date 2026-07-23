@@ -25,7 +25,8 @@ data class TransactionDetailUiState(
 @HiltViewModel
 class TransactionDetailViewModel @Inject constructor(
     private val transactionRepository: TransactionRepository,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val budgetThresholdNotifier: com.app.cashflowfamily.utils.BudgetThresholdNotifier
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TransactionDetailUiState())
@@ -110,6 +111,18 @@ class TransactionDetailViewModel @Inject constructor(
                 .onSuccess { transaction ->
                     _updateState.value = Resource.Success(transaction)
                     _uiState.value = _uiState.value.copy(transaction = transaction)
+
+                    // ===== CEK BUDGET =====
+                    // Perubahan jumlah/kategori/tanggal transaksi bisa membuat
+                    // budget kategori (lama atau baru) melewati ambang batas.
+                    viewModelScope.launch {
+                        budgetThresholdNotifier.checkAndNotify(
+                            familyId = transaction.familyId,
+                            category = transaction.category,
+                            type = transaction.type,
+                            date = transaction.date
+                        )
+                    }
                 }
                 .onFailure { error ->
                     _updateState.value = Resource.Error(
