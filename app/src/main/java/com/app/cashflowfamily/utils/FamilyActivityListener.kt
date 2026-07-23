@@ -119,6 +119,19 @@ class FamilyActivityListener @Inject constructor(
                     notificationRepository.addNotifications(notifications)
                         .onSuccess {
                             Log.d("FamilyListener", "In-app notifications sent to ${notifications.size} members")
+
+                            // ===== PUSH NOTIFICATION (FCM, lewat push-server) =====
+                            // Dipanggil setelah dokumen notifikasi berhasil dibuat, supaya
+                            // anggota keluarga lain tetap dapat notifikasi walau app mereka
+                            // sedang tertutup/dibunuh (tidak cuma saat listener ini aktif).
+                            PushNotifier.notify(
+                                recipientUserIds = family.members,
+                                actorUserId = transaction.userId,
+                                type = "family_activity",
+                                title = "Transaksi Baru oleh ${transaction.userName}",
+                                message = "${transaction.userName} mencatat ${if (transaction.type == "income") "pemasukan" else "pengeluaran"} ${CurrencyFormatter.formatRupiah(transaction.amount)} - ${transaction.category}",
+                                notificationId = notifications.firstOrNull()?.notificationId.orEmpty()
+                            )
                         }
                         .onFailure { error ->
                             Log.e("FamilyListener", "Failed to send in-app notifications", error)

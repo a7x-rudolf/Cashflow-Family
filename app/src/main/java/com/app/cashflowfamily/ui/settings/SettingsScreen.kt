@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PhoneAndroid
+import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -50,6 +51,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.app.cashflowfamily.data.preferences.ThemeMode
 import com.app.cashflowfamily.ui.components.ChangePasswordDialog
@@ -58,6 +60,7 @@ import com.app.cashflowfamily.ui.components.EditNameDialog
 import com.app.cashflowfamily.ui.components.SettingsItem
 import com.app.cashflowfamily.ui.components.SettingsSectionHeader
 import com.app.cashflowfamily.ui.components.ThemeSelectorDialog
+import com.app.cashflowfamily.ui.components.UpdateDialog
 import com.app.cashflowfamily.ui.navigation.Screen
 import com.app.cashflowfamily.utils.Resource
 import com.app.cashflowfamily.viewmodel.AuthViewModel
@@ -81,6 +84,10 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.IconButton
 import androidx.compose.ui.Alignment
+import com.app.cashflowfamily.viewmodel.UpdateViewModel
+import kotlinx.coroutines.delay
+
+// ===== TIDAK ADA IMPORT BuildConfig! =====
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -90,18 +97,28 @@ fun SettingsScreen(
     themeViewModel: ThemeViewModel = hiltViewModel(),
     authViewModel: AuthViewModel = hiltViewModel(),
     notificationViewModel: NotificationSettingsViewModel = hiltViewModel(),
-    biometricViewModel: BiometricViewModel = hiltViewModel()
+    biometricViewModel: BiometricViewModel = hiltViewModel(),
+    updateViewModel: UpdateViewModel = viewModel()
 ) {
     val isDailyReminderEnabled by notificationViewModel.isDailyReminderEnabled.collectAsState()
     val isBudgetWarningEnabled by notificationViewModel.isBudgetWarningEnabled.collectAsState()
     val isFamilyActivityEnabled by notificationViewModel.isFamilyActivityEnabled.collectAsState()
     val isBiometricEnabled by biometricViewModel.isBiometricEnabled.collectAsState()
     val context = LocalContext.current
+    val appVersion = getAppVersion(context)
+
     val uiState by settingsViewModel.uiState.collectAsState()
     val updateNameState by settingsViewModel.updateNameState.collectAsState()
     val changePasswordState by settingsViewModel.changePasswordState.collectAsState()
     val themeMode by themeViewModel.themeMode.collectAsState()
     val passwordChangedSuccessfully by settingsViewModel.passwordChangedSuccessfully.collectAsState()
+
+    // ===== UPDATE STATE =====
+    val updateInfo by updateViewModel.updateInfo.collectAsState()
+    val isChecking by updateViewModel.isChecking.collectAsState()
+    val error by updateViewModel.error.collectAsState()
+    var showUpdateDialog by remember { mutableStateOf(false) }
+    var showLatestVersionStatus by remember { mutableStateOf(false) }
 
     var showEditNameDialog by remember { mutableStateOf(false) }
     var showChangePasswordDialog by remember { mutableStateOf(false) }
@@ -111,6 +128,30 @@ fun SettingsScreen(
     var topBarMenuExpanded by remember { mutableStateOf(false) }
 
     val scrollState = rememberScrollState()
+
+    // Reset status "Versi Terbaru" setelah 3 detik
+    LaunchedEffect(updateInfo) {
+        if (updateInfo == null && !isChecking) {
+            showLatestVersionStatus = true
+            delay(3000.milliseconds)
+            showLatestVersionStatus = false
+        }
+    }
+
+    // Tampilkan dialog jika ada update
+    LaunchedEffect(updateInfo) {
+        if (updateInfo != null) {
+            showUpdateDialog = true
+        }
+    }
+
+    // Tampilkan Toast jika error
+    LaunchedEffect(error) {
+        if (error != null) {
+            Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
+            updateViewModel.clearUpdateInfo()
+        }
+    }
 
     // Handle update name result
     LaunchedEffect(updateNameState) {
@@ -132,7 +173,7 @@ fun SettingsScreen(
         }
     }
 
-    // Handle change password result (Toast + close dialog)
+    // Handle change password result
     LaunchedEffect(changePasswordState) {
         when (changePasswordState) {
             is Resource.Success -> {
@@ -141,11 +182,8 @@ fun SettingsScreen(
                     "Password berhasil diubah. Silakan login kembali dengan password baru",
                     Toast.LENGTH_LONG
                 ).show()
-
                 showChangePasswordDialog = false
                 settingsViewModel.resetChangePasswordState()
-                // JANGAN reset passwordChangedSuccessfully di sini
-                // Biar LaunchedEffect di bawah bisa handle logout
             }
             is Resource.Error -> {
                 Toast.makeText(
@@ -162,13 +200,8 @@ fun SettingsScreen(
     // Handle auto logout setelah password berhasil diubah
     LaunchedEffect(passwordChangedSuccessfully) {
         if (passwordChangedSuccessfully) {
-            // Delay agar user sempat baca Toast
-            kotlinx.coroutines.delay(1500.milliseconds)
-
-            // Reset flag
+            delay(1500.milliseconds)
             settingsViewModel.resetPasswordChangedFlag()
-
-            // Logout dan navigate ke Login
             authViewModel.logout()
             rootNavController.navigate(Screen.Login.route) {
                 popUpTo(0) { inclusive = true }
@@ -198,7 +231,7 @@ fun SettingsScreen(
                     }
                 },
                 actions = {
-                    // ===== NOTIFICATION QUICK TOGGLE (soft circle) =====
+                    // Notification Quick Toggle
                     Box(
                         modifier = Modifier
                             .padding(end = 2.dp)
@@ -216,7 +249,6 @@ fun SettingsScreen(
                                 ).show()
                             }
                         ) {
-                            // Icon berubah tergantung status notifikasi
                             val hasActiveNotif = isDailyReminderEnabled || isBudgetWarningEnabled || isFamilyActivityEnabled
                             Icon(
                                 imageVector = if (hasActiveNotif) {
@@ -230,7 +262,7 @@ fun SettingsScreen(
                         }
                     }
 
-                    // ===== MENU LAINNYA (⋮) dengan soft circle =====
+                    // Menu Lainnya
                     Box(
                         modifier = Modifier
                             .padding(end = 8.dp)
@@ -343,7 +375,7 @@ fun SettingsScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // KEAMANAN Section (BARU)
+                    // KEAMANAN Section
                     SettingsSectionHeader(title = "KEAMANAN")
 
                     SettingsToggleItem(
@@ -352,17 +384,13 @@ fun SettingsScreen(
                         subtitle = "Kunci aplikasi dengan fingerprint",
                         checked = isBiometricEnabled,
                         onCheckedChange = { newValue ->
-                            android.util.Log.d("Biometric", "Toggle clicked, newValue: $newValue, currentValue: $isBiometricEnabled")
-
                             handleBiometricToggle(
                                 context = context,
                                 enable = newValue,
                                 onEnable = {
-                                    android.util.Log.d("Biometric", "Enabling biometric")
                                     biometricViewModel.setBiometricEnabled(true)
                                 },
                                 onDisable = {
-                                    android.util.Log.d("Biometric", "Disabling biometric")
                                     biometricViewModel.setBiometricEnabled(false)
                                 }
                             )
@@ -435,6 +463,7 @@ fun SettingsScreen(
                             rootNavController.navigate(Screen.BackupRestore.route)
                         }
                     )
+
                     SettingsItem(
                         icon = Icons.Filled.DarkMode,
                         title = "Tema",
@@ -463,9 +492,28 @@ fun SettingsScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // TENTANG Section
+                    // Tentang Section
                     SettingsSectionHeader(title = "TENTANG")
 
+                    // 1. Cek Update
+                    SettingsItem(
+                        icon = Icons.Filled.SystemUpdate,
+                        title = "Cek Update",
+                        subtitle = when {
+                            isChecking -> "Memeriksa update..."
+                            showLatestVersionStatus -> "Aplikasi sudah versi terbaru"
+                            updateInfo != null -> "Update tersedia"
+                            else -> "Periksa versi terbaru"
+                        },
+                        onClick = {
+                            if (!isChecking) {
+                                showLatestVersionStatus = false
+                                updateViewModel.checkForUpdate()
+                            }
+                        }
+                    )
+
+                    // 2. Tentang Aplikasi
                     SettingsItem(
                         icon = Icons.Filled.Info,
                         title = "Tentang Aplikasi",
@@ -473,16 +521,16 @@ fun SettingsScreen(
                         onClick = { showAboutDialog = true }
                     )
 
+                    // 3. Versi Aplikasi
                     SettingsItem(
                         icon = Icons.Filled.PhoneAndroid,
                         title = "Versi Aplikasi",
-                        trailing = "1.0.0",
+                        trailing = "v$appVersion",
                         showArrow = false,
                         onClick = { }
                     )
 
                     Spacer(modifier = Modifier.height(24.dp))
-
                 }
             }
         }
@@ -532,12 +580,8 @@ fun SettingsScreen(
             isDestructive = true,
             onConfirm = {
                 showLogoutDialog = false
-
                 (context as? MainActivity)?.stopFamilyListenerBeforeLogout()
-
-                // Disable biometric saat logout
                 biometricViewModel.setBiometricEnabled(false)
-
                 authViewModel.logout()
                 rootNavController.navigate(Screen.Login.route) {
                     popUpTo(0) { inclusive = true }
@@ -548,7 +592,34 @@ fun SettingsScreen(
     }
 
     if (showAboutDialog) {
-        AboutDialog(onDismiss = { showAboutDialog = false })
+        AboutDialog(
+            onDismiss = { showAboutDialog = false },
+            appVersion = appVersion
+        )
+    }
+
+    // Dialog Update
+    if (showUpdateDialog && updateInfo != null) {
+        UpdateDialog(
+            updateInfo = updateInfo!!,
+            onDismiss = {
+                showUpdateDialog = false
+                updateViewModel.clearUpdateInfo()
+            },
+            onDownloadStart = {
+                // Optional: log analytics
+            }
+        )
+    }
+}
+
+// ===== HELPER FUNCTION =====
+private fun getAppVersion(context: android.content.Context): String {
+    return try {
+        val packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
+        packageInfo.versionName ?: "1.0.0"
+    } catch (_: Exception) {
+        "1.0.0"
     }
 }
 
@@ -558,11 +629,7 @@ private fun handleBiometricToggle(
     onEnable: () -> Unit,
     onDisable: () -> Unit
 ) {
-    android.util.Log.d("Biometric", "handleBiometricToggle called with enable=$enable")
-
     if (!enable) {
-        // Mau disable - langsung disable, tidak perlu auth
-        android.util.Log.d("Biometric", "Disabling biometric...")
         onDisable()
         Toast.makeText(
             context,
@@ -572,18 +639,10 @@ private fun handleBiometricToggle(
         return
     }
 
-    // Mau enable - cek availability dulu
-    val availability = BiometricHelper.checkBiometricAvailability(context)
-    android.util.Log.d("Biometric", "Availability: $availability")
-
-    when (availability) {
+    when (val availability = BiometricHelper.checkBiometricAvailability(context)) {
         BiometricHelper.BiometricAvailability.AVAILABLE -> {
-            // GUNAKAN getActivity() - JANGAN pakai "context as? FragmentActivity"
             val activity = BiometricHelper.getActivity(context)
-            android.util.Log.d("Biometric", "Activity from getActivity(): $activity")
-
             if (activity == null) {
-                android.util.Log.e("Biometric", "Activity is null even after getActivity()!")
                 Toast.makeText(
                     context,
                     "Error: Activity tidak valid",
@@ -592,15 +651,12 @@ private fun handleBiometricToggle(
                 return
             }
 
-            android.util.Log.d("Biometric", "Showing biometric prompt...")
-
             BiometricHelper.showBiometricPrompt(
                 activity = activity,
                 title = "Aktifkan Fingerprint",
                 subtitle = "Verifikasi identitas untuk mengaktifkan fitur",
                 negativeButtonText = "Batal",
                 onSuccess = {
-                    android.util.Log.d("Biometric", "Auth SUCCESS")
                     Toast.makeText(
                         context,
                         "Login fingerprint diaktifkan",
@@ -608,15 +664,13 @@ private fun handleBiometricToggle(
                     ).show()
                     onEnable()
                 },
-                onError = { errorCode, errString ->
-                    android.util.Log.d("Biometric", "Auth ERROR: $errorCode - $errString")
+                onError = { _, errString ->
                     Toast.makeText(context, "Batal: $errString", Toast.LENGTH_SHORT).show()
                 }
             )
         }
         else -> {
             val message = BiometricHelper.getBiometricStatusMessage(availability)
-            android.util.Log.d("Biometric", "Not available: $message")
             Toast.makeText(context, message, Toast.LENGTH_LONG).show()
         }
     }
@@ -647,7 +701,6 @@ private fun ProfileCard(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Avatar
             Box(
                 modifier = Modifier
                     .size(64.dp)
@@ -697,7 +750,10 @@ private fun ProfileCard(
 }
 
 @Composable
-private fun AboutDialog(onDismiss: () -> Unit) {
+private fun AboutDialog(
+    onDismiss: () -> Unit,
+    appVersion: String
+) {
     androidx.compose.material3.AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Tentang Aplikasi") },
@@ -710,7 +766,7 @@ private fun AboutDialog(onDismiss: () -> Unit) {
                 )
 
                 Text(
-                    text = "Versi 1.0.0",
+                    text = "Versi $appVersion",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )

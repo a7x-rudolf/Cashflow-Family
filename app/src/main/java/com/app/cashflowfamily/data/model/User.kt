@@ -19,5 +19,8 @@ data class User(
     var role: String = "member",
 
     @get:PropertyName("createdAt") @set:PropertyName("createdAt")
-    var createdAt: Long = System.currentTimeMillis()
+    var createdAt: Long = System.currentTimeMillis(),
+
+    @get:PropertyName("fcmToken") @set:PropertyName("fcmToken")
+    var fcmToken: String = ""
 )

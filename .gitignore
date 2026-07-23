@@ -8,6 +8,8 @@
 .idea/workspace.xml
 .idea/navEditor.xml
 .idea/assetWizardSettings.xml
+.idea/deploymentTargetSelector.xml
+.idea/deviceManager.xml
 
 # ==============================================================
 # GRADLE
@@ -15,6 +17,7 @@
 .gradle/
 build/
 captures/
+*.hprof
 
 # ==============================================================
 # NATIVE BUILD
@@ -31,9 +34,15 @@ Thumbs.db
 # ==============================================================
 # SENSITIVE FILES (SECURITY)
 # ==============================================================
+
+# Local configuration (contains SDK path, keystore passwords)
 local.properties
+
+# Keystore files
 *.jks
 *.keystore
+
+# Firebase config (contains API keys)
 google-services.json
 
 # ==============================================================
@@ -45,13 +54,29 @@ google-services.json
 *.dex
 
 # ==============================================================
-# LOG FILES
+# LOG & TEMP FILES
 # ==============================================================
 *.log
+*.log.*
+*~
+.kotlin/
+gradle.properties~
 
 # ==============================================================
-# INTERNAL NOTES / BACKUP FILES (not needed in public repo)
+# AI / TOOL ARTIFACTS
 # ==============================================================
 .artifacts/
-*~
-*.bak
+
+# ==============================================================
+# TEST OUTPUTS
+# ==============================================================
+/test-results/
+/reports/
+
+# Firebase Admin SDK service account (SANGAT SENSITIF - jangan pernah commit!)
+*firebase-adminsdk*.json
+*serviceAccountKey*.json
+
+# Node dependencies
+node_modules/
+functions/node_modules/push-server/ 
