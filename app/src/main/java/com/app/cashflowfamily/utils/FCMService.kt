@@ -3,24 +3,34 @@
 package com.app.cashflowfamily.utils
 
 import android.annotation.SuppressLint
-import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Intent
-import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.app.cashflowfamily.MainActivity
 import com.app.cashflowfamily.R
+import com.app.cashflowfamily.data.repository.AuthRepository
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import android.util.Log
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class FCMService : FirebaseMessagingService() {
+
+    @Inject
+    lateinit var authRepository: AuthRepository
+
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     companion object {
         private const val TAG = "FCMService"
-        private const val CHANNEL_ID = "push_notifications"
-        private const val NOTIFICATION_ID = 5000
+        private const val NOTIFICATION_ID_BASE = 5000
     }
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
@@ -30,7 +40,9 @@ class FCMService : FirebaseMessagingService() {
             val title = data["title"] ?: "Cashflow Family"
             val message = data["message"] ?: "Ada aktivitas baru di keluarga Anda"
             val type = data["type"] ?: "info"
-            val notificationId = data["notificationId"]?.toIntOrNull() ?: NOTIFICATION_ID
+            val notificationId = data["notificationId"]?.hashCode()
+                ?.let { NOTIFICATION_ID_BASE + kotlin.math.abs(it % 1000) }
+                ?: NOTIFICATION_ID_BASE
 
             showPushNotification(title, message, type, notificationId)
         }
@@ -38,8 +50,20 @@ class FCMService : FirebaseMessagingService() {
 
     override fun onNewToken(token: String) {
         Log.d(TAG, "Refreshed token: $token")
-        // TODO: Kirim token ke server untuk menyimpan FCM token user
-        // saveTokenToFirestore(token)
+
+        // Firebase bisa merotasi token kapan saja (reinstall, clear data, dsb),
+        // termasuk saat belum ada user yang login -> abaikan kalau begitu.
+        val userId = authRepository.getCurrentUser()?.uid
+        if (userId.isNullOrBlank()) {
+            Log.d(TAG, "Belum ada user login, token belum disimpan")
+            return
+        }
+
+        scope.launch {
+            authRepository.updateFcmToken(userId, token)
+                .onSuccess { Log.d(TAG, "Token FCM tersimpan untuk user $userId") }
+                .onFailure { e -> Log.e(TAG, "Gagal simpan token FCM", e) }
+        }
     }
 
     private fun showPushNotification(
@@ -48,7 +72,16 @@ class FCMService : FirebaseMessagingService() {
         type: String,
         notificationId: Int
     ) {
-        createNotificationChannelIfNeeded()
+        // Pakai channel yang sama dengan notifikasi lokal supaya konsisten
+        // dan tidak duplikat channel (channel-channel ini sudah dibuat di
+        // NotificationHelper.createNotificationChannels() saat app start).
+        val channelId = when (type) {
+            "family_activity" -> NotificationHelper.CHANNEL_FAMILY_ACTIVITY
+            "budget_warning" -> NotificationHelper.CHANNEL_BUDGET_WARNING
+            "budget_over" -> NotificationHelper.CHANNEL_BUDGET_OVER
+            "reminder" -> NotificationHelper.CHANNEL_REMINDER
+            else -> NotificationHelper.CHANNEL_FAMILY_ACTIVITY
+        }
 
         val intent = Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -63,7 +96,7 @@ class FCMService : FirebaseMessagingService() {
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
-        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+        val notification = NotificationCompat.Builder(this, channelId)
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(title)
             .setContentText(message)
@@ -75,22 +108,5 @@ class FCMService : FirebaseMessagingService() {
 
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(notificationId, notification)
-    }
-
-    @SuppressLint("ObsoleteSdkInt")
-    private fun createNotificationChannelIfNeeded() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                "Push Notifications",
-                NotificationManager.IMPORTANCE_HIGH
-            ).apply {
-                description = "Notifikasi push dari Cashflow Family"
-                enableVibration(true)
-                enableLights(true)
-            }
-            val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-            manager.createNotificationChannel(channel)
-        }
     }
 }

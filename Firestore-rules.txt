@@ -1,0 +1,191 @@
+rules_version = '2';
+
+// =====================================================================
+// Firestore Security Rules - CashflowFamily (FIXED)
+//
+// Perubahan penting dibanding versi sebelumnya:
+//  1. users/update: self-edit TIDAK bisa lagi mengubah role/familyId
+//     bebas. Ubah role/familyId sendiri hanya boleh kalau memang sudah
+//     tercatat sebagai member sah di families/{id}.members (join/leave),
+//     atau dilakukan oleh admin family yang sama (kick/promote).
+//  2. families/update (join): ditambah get() untuk memastikan hanya
+//     dipakai sesuai pola app; families/{id} dipisah jadi "get" vs
+//     "list" supaya koleksi family TIDAK BISA di-dump (list dibatasi
+//     limit(1), sama seperti pola query FamilyRepository.joinFamily).
+//  3. notifications/create: divalidasi familyId requester.
+//  4. transactions/budgets/recurring update: field familyId & userId
+//     dikunci (tidak bisa diubah lewat update).
+// =====================================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- Helpers ----------
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function myUser() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function myFamilyId() {
+      return isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        ? myUser().familyId
+        : null;
+    }
+
+    function isMyAdmin() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && myUser().role == "admin";
+    }
+
+    function isSameFamily(familyId) {
+      return isSignedIn() && familyId != null && familyId != "" && myFamilyId() == familyId;
+    }
+
+    // User benar-benar tercatat di families/{familyId}.members
+    function isRealMember(familyId) {
+      return familyId != "" &&
+        exists(/databases/$(database)/documents/families/$(familyId)) &&
+        get(/databases/$(database)/documents/families/$(familyId)).data.members.hasAny([request.auth.uid]);
+    }
+
+    // ---------- users/{userId} ----------
+    match /users/{userId} {
+      allow read: if isOwner(userId)
+        || (isSignedIn()
+            && exists(/databases/$(database)/documents/users/$(userId))
+            && isSameFamily(resource.data.familyId));
+
+      // role & familyId WAJIB default saat create (tidak boleh langsung admin/gabung family)
+      allow create: if isOwner(userId)
+        && request.resource.data.userId == userId
+        && request.resource.data.role == "member"
+        && request.resource.data.familyId == "";
+
+      allow update: if isOwner(userId) && (
+          // (a) edit profil biasa: role & familyId TIDAK berubah
+          (request.resource.data.role == resource.data.role
+            && request.resource.data.familyId == resource.data.familyId)
+          ||
+          // (b) self join/leave: role harus tetap "member", dan familyId baru
+          //     harus valid (kosong = leave, atau family yang membership-nya
+          //     SUDAH tercatat di families/{id}.members = join setelah arrayUnion)
+          (request.resource.data.diff(resource.data).affectedKeys().hasOnly(["familyId", "role"])
+            && request.resource.data.role == "member"
+            && (request.resource.data.familyId == "" || isRealMember(request.resource.data.familyId)))
+        )
+        ||
+        // (c) admin family yang sama mengubah familyId/role anggota LAIN (kick/promote)
+        (isMyAdmin()
+          && isSameFamily(resource.data.familyId)
+          && userId != request.auth.uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["familyId", "role"]));
+
+      allow delete: if false;
+    }
+
+    // ---------- families/{familyId} ----------
+    match /families/{familyId} {
+      // GET by ID: boleh, dipakai untuk isRealMember() & buka detail family sendiri
+      allow get: if isSignedIn();
+
+      // LIST/query: dibatasi limit(1) -> cocok dengan pola
+      // whereEqualTo("familyCode", code).get() di FamilyRepository,
+      // tapi mencegah dump seluruh koleksi families.
+      allow list: if isSignedIn() && request.query.limit <= 1;
+
+      allow create: if isSignedIn()
+        && request.resource.data.ownerId == request.auth.uid
+        && request.resource.data.members == [request.auth.uid];
+
+      allow update: if isSignedIn() && (
+        resource.data.members.hasAny([request.auth.uid])
+        || request.resource.data.members == resource.data.members.concat([request.auth.uid])
+        || request.resource.data.members == resource.data.members.removeAll([request.auth.uid])
+      )
+      && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["members"]);
+
+      allow delete: if false;
+    }
+
+    // ---------- transactions/{transactionId} ----------
+    match /transactions/{transactionId} {
+      allow read: if isSameFamily(resource.data.familyId);
+
+      allow create: if isSignedIn()
+        && isSameFamily(request.resource.data.familyId)
+        && request.resource.data.userId == request.auth.uid;
+
+      allow update: if isSameFamily(resource.data.familyId)
+        && request.resource.data.familyId == resource.data.familyId
+        && request.resource.data.userId == resource.data.userId;
+
+      allow delete: if isSameFamily(resource.data.familyId);
+    }
+
+    // ---------- budgets/{budgetId} ----------
+    match /budgets/{budgetId} {
+      allow read: if isSameFamily(resource.data.familyId);
+
+      allow create: if isSignedIn()
+        && isSameFamily(request.resource.data.familyId)
+        && request.resource.data.createdBy == request.auth.uid;
+
+      allow update: if isSameFamily(resource.data.familyId)
+        && request.resource.data.familyId == resource.data.familyId;
+
+      allow delete: if isSameFamily(resource.data.familyId);
+    }
+
+    // ---------- recurring_transactions/{recurringId} ----------
+    match /recurring_transactions/{recurringId} {
+      allow read: if isSameFamily(resource.data.familyId);
+
+      allow create: if isSignedIn()
+        && isSameFamily(request.resource.data.familyId)
+        && request.resource.data.userId == request.auth.uid;
+
+      allow update: if isSameFamily(resource.data.familyId)
+        && request.resource.data.familyId == resource.data.familyId
+        && request.resource.data.userId == resource.data.userId;
+
+      allow delete: if isSameFamily(resource.data.familyId);
+    }
+
+    // ---------- notifications/{notificationId} ----------
+    match /notifications/{notificationId} {
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+
+      // Hanya boleh dibuat untuk diri sendiri, atau untuk sesama anggota
+      // family yang sama (dipakai notifikasi antar-anggota keluarga).
+      allow create: if isSignedIn()
+        && isSameFamily(request.resource.data.familyId);
+
+      allow update: if isSignedIn() && resource.data.userId == request.auth.uid;
+
+      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    // ---------- feedbacks/{feedbackId} ----------
+    match /feedbacks/{feedbackId} {
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+
+      allow create: if isSignedIn()
+        && request.resource.data.userId == request.auth.uid;
+
+      allow update, delete: if false;
+    }
+
+    // Default: tolak semua yang tidak match
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

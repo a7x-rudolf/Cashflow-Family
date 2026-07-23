@@ -18,7 +18,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -26,10 +25,9 @@ import javax.inject.Inject
 class AddTransactionViewModel @Inject constructor(
     private val transactionRepository: TransactionRepository,
     private val authRepository: AuthRepository,
-    private val budgetRepository: com.app.cashflowfamily.data.repository.BudgetRepository,
-    private val notificationPreferences: com.app.cashflowfamily.data.preferences.NotificationPreferences,
     private val notificationRepository: NotificationRepository,
     private val familyRepository: FamilyRepository,
+    private val budgetThresholdNotifier: com.app.cashflowfamily.utils.BudgetThresholdNotifier,
     @ApplicationContext private val context: android.content.Context
 ) : ViewModel() {
 
@@ -78,10 +76,11 @@ class AddTransactionViewModel @Inject constructor(
                             sendNotifications(savedTransaction, user)
 
                             // ===== CEK BUDGET =====
-                            if (type == "expense") {
-                                checkBudgetAndNotify(
+                            viewModelScope.launch {
+                                budgetThresholdNotifier.checkAndNotify(
                                     familyId = user.familyId,
                                     category = category,
+                                    type = type,
                                     date = date
                                 )
                             }
@@ -160,140 +159,4 @@ class AddTransactionViewModel @Inject constructor(
         _saveState.value = Resource.Idle
     }
 
-    private fun checkBudgetAndNotify(
-        familyId: String,
-        category: String,
-        date: Long
-    ) {
-        viewModelScope.launch {
-            try {
-                val isEnabled = notificationPreferences.isBudgetWarningEnabled.first()
-
-                if (!isEnabled) return@launch
-
-                val month = com.app.cashflowfamily.utils.DateFormatter.getMonth(date)
-                val year = com.app.cashflowfamily.utils.DateFormatter.getYear(date)
-
-                budgetRepository.getBudgets(familyId, month, year)
-                    .onSuccess { budgets ->
-                        val matchingBudget = budgets.find { it.category == category }
-                            ?: return@onSuccess
-
-                        transactionRepository.getTransactions(familyId)
-                            .onSuccess { transactions ->
-                                val monthTransactions = transactions.filter {
-                                    it.type == "expense" &&
-                                            it.category == category &&
-                                            com.app.cashflowfamily.utils.DateFormatter.isSameMonth(it.date, date)
-                                }
-
-                                val spent = monthTransactions.sumOf { it.amount }
-                                val percentage = ((spent / matchingBudget.amount) * 100).toInt()
-
-                                Log.d("AddTransactionVM", "Budget check: $category spent $spent of ${matchingBudget.amount} ($percentage%)")
-
-                                // ===== SYSTEM NOTIFICATION =====
-                                when {
-                                    percentage >= 100 -> {
-                                        NotificationHelper.showBudgetOver(
-                                            context = context,
-                                            category = category,
-                                            percentage = percentage,
-                                            spent = spent,
-                                            budget = matchingBudget.amount
-                                        )
-                                        Log.d("AddTransactionVM", "Budget OVER notification sent")
-                                    }
-                                    percentage >= 80 -> {
-                                        NotificationHelper.showBudgetWarning(
-                                            context = context,
-                                            category = category,
-                                            percentage = percentage,
-                                            spent = spent,
-                                            budget = matchingBudget.amount
-                                        )
-                                        Log.d("AddTransactionVM", "Budget WARNING notification sent")
-                                    }
-                                }
-
-                                // ===== IN-APP NOTIFICATION BUDGET (Firestore) KE SEMUA MEMBER =====
-                                if (percentage >= 80) {
-                                    sendBudgetInAppNotification(
-                                        familyId = familyId,
-                                        category = category,
-                                        percentage = percentage,
-                                        spent = spent,
-                                        budgetAmount = matchingBudget.amount,
-                                        isOver = percentage >= 100
-                                    )
-                                }
-                            }
-                    }
-            } catch (e: Exception) {
-                Log.e("AddTransactionVM", "Error checking budget", e)
-            }
-        }
-    }
-
-    /**
-     * Kirim in-app notification untuk budget warning/over ke semua member keluarga
-     */
-    private fun sendBudgetInAppNotification(
-        familyId: String,
-        category: String,
-        percentage: Int,
-        spent: Double,
-        budgetAmount: Double,
-        isOver: Boolean
-    ) {
-        viewModelScope.launch {
-            try {
-                val family = familyRepository.getFamilyById(familyId).getOrNull()
-
-                if (family == null || family.members.isEmpty()) {
-                    Log.e("AddTransactionVM", "Family not found or empty for budget notification")
-                    return@launch
-                }
-
-                val title = if (isOver) {
-                    "Budget Terlampaui: $category"
-                } else {
-                    "Peringatan Budget: $category"
-                }
-
-                val message = if (isOver) {
-                    "Budget $category terlampaui! Terpakai ${CurrencyFormatter.formatRupiah(spent)} dari ${CurrencyFormatter.formatRupiah(budgetAmount)}"
-                } else {
-                    "Budget $category sudah mencapai $percentage% (${CurrencyFormatter.formatRupiah(spent)} dari ${CurrencyFormatter.formatRupiah(budgetAmount)})"
-                }
-
-                val notifications = family.members.map { memberId ->
-                    com.app.cashflowfamily.data.model.Notification(
-                        familyId = familyId,
-                        userId = memberId,
-                        type = if (isOver) "budget_over" else "budget_warning",
-                        title = title,
-                        message = message,
-                        data = mapOf(
-                            "category" to category,
-                            "spent" to spent.toString(),
-                            "budget" to budgetAmount.toString(),
-                            "percentage" to percentage.toString()
-                        )
-                    )
-                }
-
-                notificationRepository.addNotifications(notifications)
-                    .onSuccess {
-                        Log.d("AddTransactionVM", "Budget notifications sent to ${notifications.size} members")
-                    }
-                    .onFailure { error ->
-                        Log.e("AddTransactionVM", "Failed to send budget notifications", error)
-                    }
-
-            } catch (e: Exception) {
-                Log.e("AddTransactionVM", "Error sending budget in-app notification", e)
-            }
-        }
-    }
 }

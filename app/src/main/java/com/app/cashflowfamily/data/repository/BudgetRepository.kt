@@ -90,6 +90,23 @@ class BudgetRepository @Inject constructor(
         }
     }
 
+    // Catat tier threshold (80/100) terakhir yang sudah dikirim notifikasinya,
+    // supaya BudgetThresholdNotifier tidak kirim notifikasi berulang untuk
+    // tier yang sama di bulan yang sama.
+    suspend fun updateNotifiedPercentage(budgetId: String, tier: Int): Result<Unit> {
+        return try {
+            firestore.collection("budgets")
+                .document(budgetId)
+                .update("lastNotifiedPercentage", tier)
+                .await()
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Log.e("BudgetRepo", "Error updating notified percentage", e)
+            Result.failure(e)
+        }
+    }
+
     // Delete budget
     suspend fun deleteBudget(budgetId: String): Result<Unit> {
         return try {
