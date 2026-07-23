@@ -1,20 +1,7 @@
 rules_version = '2';
 
 // =====================================================================
-// Firestore Security Rules - CashflowFamily (FIXED)
-//
-// Perubahan penting dibanding versi sebelumnya:
-//  1. users/update: self-edit TIDAK bisa lagi mengubah role/familyId
-//     bebas. Ubah role/familyId sendiri hanya boleh kalau memang sudah
-//     tercatat sebagai member sah di families/{id}.members (join/leave),
-//     atau dilakukan oleh admin family yang sama (kick/promote).
-//  2. families/update (join): ditambah get() untuk memastikan hanya
-//     dipakai sesuai pola app; families/{id} dipisah jadi "get" vs
-//     "list" supaya koleksi family TIDAK BISA di-dump (list dibatasi
-//     limit(1), sama seperti pola query FamilyRepository.joinFamily).
-//  3. notifications/create: divalidasi familyId requester.
-//  4. transactions/budgets/recurring update: field familyId & userId
-//     dikunci (tidak bisa diubah lewat update).
+// Firestore Security Rules - CashflowFamily
 // =====================================================================
 
 service cloud.firestore {
