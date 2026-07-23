@@ -37,8 +37,8 @@ android {
         minSdk = 26
         //noinspection OldTargetApi
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 6
+        versionName = "1.0.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -167,6 +167,10 @@ dependencies {
     // ===== DATASTORE =====
     //noinspection UseTomlInstead,GradleDependency
     implementation("androidx.datastore:datastore-preferences:1.1.1")
+
+    // ===== OKHTTP (Network) =====
+    //noinspection UseTomlInstead,NewerVersionAvailable
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
     // ===== TEST =====
     testImplementation(libs.junit)

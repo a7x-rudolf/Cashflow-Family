@@ -1,9 +1,11 @@
 package com.app.cashflowfamily.data.repository
 
+import android.util.Log
 import com.app.cashflowfamily.data.model.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -42,6 +44,8 @@ class AuthRepository @Inject constructor(
                 .set(user)
                 .await()
 
+            syncFcmToken(userId)
+
             Result.success(user)
         } catch (e: Exception) {
             Result.failure(e)
@@ -67,9 +71,40 @@ class AuthRepository @Inject constructor(
             val user = userDoc.toObject(User::class.java)
                 ?: return Result.failure(Exception("Data user tidak ditemukan"))
 
+            syncFcmToken(userId)
+
             Result.success(user)
         } catch (e: Exception) {
             Result.failure(e)
+        }
+    }
+
+    // Simpan/update token FCM device saat ini ke dokumen user di Firestore.
+    // Dipanggil setiap kali user berhasil login/register, dan juga dari
+    // FCMService.onNewToken() saat Firebase merotasi token secara otomatis.
+    suspend fun updateFcmToken(userId: String, token: String): Result<Unit> {
+        return try {
+            if (userId.isBlank() || token.isBlank()) return Result.success(Unit)
+            firestore.collection("users")
+                .document(userId)
+                .update("fcmToken", token)
+                .await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Log.e("AuthRepository", "Gagal update fcmToken", e)
+            Result.failure(e)
+        }
+    }
+
+    // Ambil token FCM device saat ini lalu simpan ke Firestore.
+    // Kegagalan di sini tidak boleh menggagalkan proses login/register,
+    // jadi errornya cukup di-log saja.
+    private suspend fun syncFcmToken(userId: String) {
+        try {
+            val token = FirebaseMessaging.getInstance().token.await()
+            updateFcmToken(userId, token)
+        } catch (e: Exception) {
+            Log.e("AuthRepository", "Gagal ambil/sync FCM token", e)
         }
     }
 
@@ -102,6 +137,8 @@ class AuthRepository @Inject constructor(
                 userDocRef.set(newUser).await()
                 newUser
             }
+
+            syncFcmToken(userId)
 
             Result.success(user)
         } catch (e: Exception) {

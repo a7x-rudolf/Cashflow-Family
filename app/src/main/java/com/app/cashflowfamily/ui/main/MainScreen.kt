@@ -11,15 +11,22 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.app.cashflowfamily.ui.components.UpdateDialog
 import com.app.cashflowfamily.ui.family.FamilyManagementScreen
 import com.app.cashflowfamily.ui.home.HomeScreen
 import com.app.cashflowfamily.ui.navigation.BottomNavItem
@@ -27,25 +34,37 @@ import com.app.cashflowfamily.ui.navigation.Screen
 import com.app.cashflowfamily.ui.settings.SettingsScreen
 import com.app.cashflowfamily.ui.transaction.HistoryScreen
 import com.app.cashflowfamily.viewmodel.NotificationViewModel
-import androidx.compose.ui.unit.dp
+import com.app.cashflowfamily.viewmodel.UpdateViewModel
 
 @Composable
 fun MainScreen(
     rootNavController: NavController
 ) {
-    // Nav controller khusus untuk bottom nav (nested)
     val bottomNavController = rememberNavController()
-
-    // Inisialisasi NotificationViewModel untuk real-time listener
     val notificationViewModel: NotificationViewModel = hiltViewModel()
 
-    // ===== START REAL-TIME LISTENER SAAT MAIN SCREEN DIBUKA =====
-    // Listener akan berjalan selama aplikasi di MainScreen
+    val updateViewModel: UpdateViewModel = viewModel()
+    val updateInfo by updateViewModel.updateInfo.collectAsState()
+    var showUpdateDialog by remember { mutableStateOf(false) }
+
+    // Cek update otomatis saat pertama kali dibuka
+    LaunchedEffect(Unit) {
+        updateViewModel.checkForUpdate()
+    }
+
+    // Tampilkan dialog jika ada update
+    LaunchedEffect(updateInfo) {
+        if (updateInfo != null) {
+            showUpdateDialog = true
+        }
+    }
+
+    // Start real-time listener
     LaunchedEffect(Unit) {
         notificationViewModel.startRealTimeListener()
     }
 
-    // ===== STOP LISTENER SAAT MAIN SCREEN DITUTUP =====
+    // Stop listener saat screen ditutup
     DisposableEffect(Unit) {
         onDispose {
             notificationViewModel.stopRealTimeListener()
@@ -66,7 +85,7 @@ fun MainScreen(
                 HomeScreen(
                     rootNavController = rootNavController,
                     bottomNavController = bottomNavController,
-                    notificationViewModel = notificationViewModel  // Pass viewModel yang sama
+                    notificationViewModel = notificationViewModel
                 )
             }
 
@@ -82,6 +101,20 @@ fun MainScreen(
                 SettingsScreen(rootNavController = rootNavController)
             }
         }
+    }
+
+    // Dialog Update
+    if (showUpdateDialog && updateInfo != null) {
+        UpdateDialog(
+            updateInfo = updateInfo!!,
+            onDismiss = {
+                showUpdateDialog = false
+                updateViewModel.clearUpdateInfo()
+            },
+            onDownloadStart = {
+                // Optional: log analytics
+            }
+        )
     }
 }
 
@@ -102,7 +135,6 @@ private fun BottomNavigationBar(navController: NavController) {
                 onClick = {
                     if (currentRoute != item.route) {
                         navController.navigate(item.route) {
-                            // Pop up ke start destination biar back stack tidak bertumpuk
                             popUpTo(navController.graph.findStartDestination().id) {
                                 saveState = true
                             }

@@ -12,7 +12,8 @@ import javax.inject.Singleton
 @Singleton
 class RecurringRepository @Inject constructor(
     private val firestore: FirebaseFirestore,
-    private val transactionRepository: TransactionRepository
+    private val transactionRepository: TransactionRepository,
+    private val budgetThresholdNotifier: com.app.cashflowfamily.utils.BudgetThresholdNotifier
 ) {
 
     // Ambil semua recurring transaction keluarga
@@ -237,6 +238,17 @@ class RecurringRepository @Inject constructor(
             Log.d(
                 "RecurringRepo",
                 "Generated recurring transaction: $generatedTransactionId"
+            )
+
+            // ===== CEK BUDGET =====
+            // Transaksi otomatis dari recurring (misal tagihan listrik) bisa
+            // membuat budget kategori terkait melewati ambang batas, jadi
+            // family tetap perlu diberi tahu walau tidak ada yang input manual.
+            budgetThresholdNotifier.checkAndNotify(
+                familyId = recurring.familyId,
+                category = recurring.category,
+                type = recurring.type,
+                date = dueDate
             )
 
             true
