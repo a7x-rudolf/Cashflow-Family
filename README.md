@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="docs/images/banner.png" alt="Cashflow Family Banner" width="100%">
-</p>
-
 <h1 align="center">Cashflow Family</h1>
 
 <p align="center">
