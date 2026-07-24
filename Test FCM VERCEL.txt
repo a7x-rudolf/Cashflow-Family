@@ -1,0 +1,11 @@
+curl -X POST https://cashflow-push-server.vercel.app/api/send-push \
+  -H "Authorization: Bearer <Cf9x2LqW8mVzR4tPnK6jH1sYuA3bD7oE>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "recipientUserIds": ["<PnA3Oyofd7UnnwNBq7idAFoG9Yc2>"],
+    "type": "test",
+    "title": "Test Push",
+    "message": "Ini test notifikasi dari server"
+  }'
+
+curl -X POST "https://cashflow-push-server.vercel.app/api/send-push" -H "Authorization: Bearer <Cf9x2LqW8mVzR4tPnK6jH1sYuA3bD7oE>" -H "Content-Type: application/json" -d "{\"recipientUserIds\":[\"<PnA3Oyofd7UnnwNBq7idAFoG9Yc2>\"],\"type\":\"test\",\"title\":\"Test Push\",\"message\":\"Ini test notifikasi dari server\"}"
