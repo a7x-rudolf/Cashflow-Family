@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
@@ -41,7 +40,6 @@ fun MemberItem(
     modifier: Modifier = Modifier
 ) {
     val isAdmin = user.role == "admin"
-    val initial = user.name.firstOrNull()?.uppercaseChar()?.toString() ?: "?"
 
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -61,27 +59,18 @@ fun MemberItem(
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Avatar dengan inisial
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(
-                        if (isAdmin) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.secondary
-                        }
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = initial,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
-            }
+            // Avatar (foto profil kalau ada, fallback ke inisial)
+            UserAvatar(
+                name = user.name,
+                photoUrl = user.photoUrl,
+                size = 48.dp,
+                backgroundColor = if (isAdmin) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.secondary
+                },
+                textColor = Color.White
+            )
 
             Spacer(modifier = Modifier.width(12.dp))
 

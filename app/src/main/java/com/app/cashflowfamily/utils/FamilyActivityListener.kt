@@ -7,8 +7,6 @@ import android.util.Log
 import com.app.cashflowfamily.data.model.Transaction
 import com.app.cashflowfamily.data.preferences.NotificationPreferences
 import com.app.cashflowfamily.data.repository.AuthRepository
-import com.app.cashflowfamily.data.repository.FamilyRepository  // TAMBAHKAN
-import com.app.cashflowfamily.data.repository.NotificationRepository  // TAMBAHKAN
 import com.app.cashflowfamily.data.repository.TransactionRepository
 import com.google.firebase.firestore.ListenerRegistration
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -20,14 +18,21 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * HANYA untuk menampilkan system notification lokal secara instan di device
+ * member lain SAAT app mereka sedang foreground (real-time UX tambahan).
+ *
+ * TIDAK BOLEH menulis ke Firestore collection `notifications` dan TIDAK BOLEH
+ * memanggil PushNotifier di sini -- itu semua sudah ditangani sepenuhnya oleh
+ * AddTransactionViewModel.sendNotifications() di device pembuat transaksi.
+ * Kalau ditambahkan lagi di sini, notifikasi & push akan terkirim DOBEL.
+ */
 @Singleton
 class FamilyActivityListener @Inject constructor(
     @ApplicationContext private val context: Context,
     private val transactionRepository: TransactionRepository,
     private val authRepository: AuthRepository,
-    private val notificationPreferences: NotificationPreferences,
-    private val notificationRepository: NotificationRepository,  // TAMBAHKAN
-    private val familyRepository: FamilyRepository  // TAMBAHKAN
+    private val notificationPreferences: NotificationPreferences
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var listener: ListenerRegistration? = null
@@ -83,9 +88,9 @@ class FamilyActivityListener @Inject constructor(
                     return@launch
                 }
 
-                Log.d("FamilyListener", "Showing notification for: ${transaction.userName}")
+                Log.d("FamilyListener", "Showing local notification for: ${transaction.userName}")
 
-                // ===== SYSTEM NOTIFICATION (Status Bar) =====
+                // ===== SYSTEM NOTIFICATION LOKAL SAJA (tidak menulis Firestore, tidak push) =====
                 NotificationHelper.showFamilyTransactionNotification(
                     context = context,
                     userName = transaction.userName,
@@ -93,50 +98,6 @@ class FamilyActivityListener @Inject constructor(
                     amount = transaction.amount,
                     category = transaction.category
                 )
-
-                // ===== IN-APP NOTIFICATION (Firestore) =====
-                val family = familyRepository.getFamilyById(transaction.familyId)
-                    .getOrNull()
-
-                if (family != null) {
-                    val notifications = family.members.map { memberId ->
-                        com.app.cashflowfamily.data.model.Notification(
-                            familyId = transaction.familyId,
-                            userId = memberId,
-                            type = "family_activity",
-                            title = "Transaksi Baru oleh ${transaction.userName}",
-                            message = "${transaction.userName} mencatat ${if (transaction.type == "income") "pemasukan" else "pengeluaran"} ${CurrencyFormatter.formatRupiah(transaction.amount)} - ${transaction.category}",
-                            data = mapOf(
-                                "transactionId" to transaction.transactionId,
-                                "userId" to transaction.userId,
-                                "userName" to transaction.userName,
-                                "type" to transaction.type,
-                                "amount" to transaction.amount.toString()
-                            )
-                        )
-                    }
-
-                    notificationRepository.addNotifications(notifications)
-                        .onSuccess {
-                            Log.d("FamilyListener", "In-app notifications sent to ${notifications.size} members")
-
-                            // ===== PUSH NOTIFICATION (FCM, lewat push-server) =====
-                            // Dipanggil setelah dokumen notifikasi berhasil dibuat, supaya
-                            // anggota keluarga lain tetap dapat notifikasi walau app mereka
-                            // sedang tertutup/dibunuh (tidak cuma saat listener ini aktif).
-                            PushNotifier.notify(
-                                recipientUserIds = family.members,
-                                actorUserId = transaction.userId,
-                                type = "family_activity",
-                                title = "Transaksi Baru oleh ${transaction.userName}",
-                                message = "${transaction.userName} mencatat ${if (transaction.type == "income") "pemasukan" else "pengeluaran"} ${CurrencyFormatter.formatRupiah(transaction.amount)} - ${transaction.category}",
-                                notificationId = notifications.firstOrNull()?.notificationId.orEmpty()
-                            )
-                        }
-                        .onFailure { error ->
-                            Log.e("FamilyListener", "Failed to send in-app notifications", error)
-                        }
-                }
 
             } catch (e: Exception) {
                 Log.e("FamilyListener", "Error handling new transaction", e)

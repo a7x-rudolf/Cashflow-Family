@@ -12,6 +12,7 @@ import com.app.cashflowfamily.data.repository.NotificationRepository
 import com.app.cashflowfamily.data.repository.TransactionRepository
 import com.app.cashflowfamily.utils.CurrencyFormatter
 import com.app.cashflowfamily.utils.NotificationHelper
+import com.app.cashflowfamily.utils.PushNotifier
 import com.app.cashflowfamily.utils.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -72,7 +73,7 @@ class AddTransactionViewModel @Inject constructor(
                         .onSuccess { savedTransaction ->
                             _saveState.value = Resource.Success(savedTransaction)
 
-                            // ===== KIRIM NOTIFIKASI =====
+                            // ===== KIRIM NOTIFIKASI (in-app + push) =====
                             sendNotifications(savedTransaction, user)
 
                             // ===== CEK BUDGET =====
@@ -100,7 +101,16 @@ class AddTransactionViewModel @Inject constructor(
     }
 
     /**
-     * Kirim notifikasi ke semua member keluarga (In-App) + System notification untuk user sendiri
+     * Kirim notifikasi ke semua member keluarga:
+     *  1. In-app notification (Firestore) untuk semua member.
+     *  2. System notification lokal untuk diri sendiri (langsung tampil, tanpa delay jaringan).
+     *  3. Push notification (FCM lewat push-server) untuk SEMUA member KECUALI diri sendiri
+     *     (diri sendiri sudah tahu, dia yang input transaksinya).
+     *
+     * Ini SATU-SATUNYA tempat yang memicu notifikasi untuk event "transaksi baru".
+     * Jangan tambahkan trigger serupa di tempat lain (mis. listener di device member lain),
+     * supaya tidak terjadi notifikasi/push dobel dan supaya push tetap terkirim walau semua
+     * member lain sedang menutup app-nya.
      */
     private fun sendNotifications(
         transaction: Transaction,
@@ -108,38 +118,60 @@ class AddTransactionViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             try {
-                // ===== 1. IN-APP NOTIFICATION UNTUK SEMUA MEMBER KELUARGA =====
                 val family = familyRepository.getFamilyById(user.familyId).getOrNull()
 
-                if (family != null && family.members.isNotEmpty()) {
-                    val notifications = family.members.map { memberId ->
-                        com.app.cashflowfamily.data.model.Notification(
-                            familyId = user.familyId,
-                            userId = memberId,
-                            type = "family_activity",
-                            title = "Transaksi Baru oleh ${user.name}",
-                            message = "${user.name} mencatat ${if (transaction.type == "income") "pemasukan" else "pengeluaran"} ${CurrencyFormatter.formatRupiah(transaction.amount)} - ${transaction.category}",
-                            data = mapOf(
-                                "transactionId" to transaction.transactionId,
-                                "userId" to user.userId,
-                                "userName" to user.name,
-                                "type" to transaction.type,
-                                "amount" to transaction.amount.toString()
-                            )
-                        )
-                    }
-
-                    notificationRepository.addNotifications(notifications)
-                        .onSuccess {
-                            Log.d("AddTransactionVM", "Broadcast notifications sent to ${notifications.size} members")
-                        }
-                        .onFailure { error ->
-                            Log.e("AddTransactionVM", "Failed to broadcast notifications", error)
-                        }
+                if (family == null || family.members.isEmpty()) {
+                    Log.w("AddTransactionVM", "Family tidak ditemukan atau tidak ada member, skip notifikasi")
+                    return@launch
                 }
 
-                // ===== 2. SYSTEM NOTIFICATION (Status Bar) =====
-                // Hanya untuk user yang login (tidak broadcast ke semua)
+                val title = "Transaksi Baru oleh ${user.name}"
+                val message = "${user.name} mencatat ${if (transaction.type == "income") "pemasukan" else "pengeluaran"} " +
+                        "${CurrencyFormatter.formatRupiah(transaction.amount)} - ${transaction.category}"
+
+                // ===== 1. IN-APP NOTIFICATION UNTUK SEMUA MEMBER KELUARGA =====
+                val notifications = family.members.map { memberId ->
+                    com.app.cashflowfamily.data.model.Notification(
+                        familyId = user.familyId,
+                        userId = memberId,
+                        type = "family_activity",
+                        title = title,
+                        message = message,
+                        data = mapOf(
+                            "transactionId" to transaction.transactionId,
+                            "userId" to user.userId,
+                            "userName" to user.name,
+                            "type" to transaction.type,
+                            "amount" to transaction.amount.toString()
+                        )
+                    )
+                }
+
+                notificationRepository.addNotifications(notifications)
+                    .onSuccess { savedNotifications ->
+                        Log.d("AddTransactionVM", "Broadcast notifications sent to ${savedNotifications.size} members")
+
+                        // ===== 3. PUSH NOTIFICATION (FCM lewat push-server) =====
+                        // Kirim ke semua member KECUALI diri sendiri.
+                        val recipientIds = family.members.filter { it != user.userId }
+
+                        if (recipientIds.isNotEmpty()) {
+                            PushNotifier.notify(
+                                recipientUserIds = recipientIds,
+                                actorUserId = user.userId,
+                                type = "family_activity",
+                                title = title,
+                                message = message,
+                                notificationId = savedNotifications.firstOrNull { it.userId != user.userId }
+                                    ?.notificationId.orEmpty()
+                            )
+                        }
+                    }
+                    .onFailure { error ->
+                        Log.e("AddTransactionVM", "Failed to broadcast notifications", error)
+                    }
+
+                // ===== 2. SYSTEM NOTIFICATION (Status Bar) UNTUK DIRI SENDIRI =====
                 NotificationHelper.showFamilyTransactionNotification(
                     context = context,
                     userName = user.name,

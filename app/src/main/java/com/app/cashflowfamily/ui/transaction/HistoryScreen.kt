@@ -31,6 +31,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,6 +44,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import com.app.cashflowfamily.ui.components.ActiveFilterChip
 import com.app.cashflowfamily.ui.components.AdvancedFilterSheet
@@ -80,6 +84,24 @@ fun HistoryScreen(
     var showFilterSheet by remember { mutableStateOf(false) }
     var showSearch by remember { mutableStateOf(false) }
     var expanded by remember { mutableStateOf(false) }
+
+    // Refresh data saat layar ini kembali terlihat (mis. setelah menambah transaksi
+    // dari layar Tambah Transaksi lalu kembali ke tab Riwayat). Tanpa ini, data yang
+    // ditampilkan adalah snapshot lama karena HistoryViewModel hanya memuat data
+    // sekali saat pertama kali dibuat (ViewModel-nya bertahan selama tab masih ada
+    // di back stack, jadi init { } tidak terpanggil ulang).
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.refresh()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
     Scaffold(
         topBar = {

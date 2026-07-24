@@ -36,6 +36,9 @@ class SettingsViewModel @Inject constructor(
     private val _changePasswordState = MutableStateFlow<Resource<Unit>>(Resource.Idle)
     val changePasswordState: StateFlow<Resource<Unit>> = _changePasswordState.asStateFlow()
 
+    private val _updatePhotoState = MutableStateFlow<Resource<Unit>>(Resource.Idle)
+    val updatePhotoState: StateFlow<Resource<Unit>> = _updatePhotoState.asStateFlow()
+
     // Flag untuk trigger logout setelah ganti password
     private val _passwordChangedSuccessfully = MutableStateFlow(false)
     val passwordChangedSuccessfully: StateFlow<Boolean> = _passwordChangedSuccessfully.asStateFlow()
@@ -98,6 +101,52 @@ class SettingsViewModel @Inject constructor(
                     )
                 }
         }
+    }
+
+    fun updatePhoto(photoDataUri: String) {
+        val user = _uiState.value.user ?: return
+
+        viewModelScope.launch {
+            _updatePhotoState.value = Resource.Loading
+
+            authRepository.updateUserPhoto(user.userId, photoDataUri)
+                .onSuccess {
+                    _updatePhotoState.value = Resource.Success(Unit)
+                    _uiState.value = _uiState.value.copy(
+                        user = user.copy(photoUrl = photoDataUri)
+                    )
+                }
+                .onFailure { error ->
+                    _updatePhotoState.value = Resource.Error(
+                        error.message ?: "Gagal memperbarui foto profil"
+                    )
+                }
+        }
+    }
+
+    fun removePhoto() {
+        val user = _uiState.value.user ?: return
+
+        viewModelScope.launch {
+            _updatePhotoState.value = Resource.Loading
+
+            authRepository.removeUserPhoto(user.userId)
+                .onSuccess {
+                    _updatePhotoState.value = Resource.Success(Unit)
+                    _uiState.value = _uiState.value.copy(
+                        user = user.copy(photoUrl = "")
+                    )
+                }
+                .onFailure { error ->
+                    _updatePhotoState.value = Resource.Error(
+                        error.message ?: "Gagal menghapus foto profil"
+                    )
+                }
+        }
+    }
+
+    fun resetUpdatePhotoState() {
+        _updatePhotoState.value = Resource.Idle
     }
 
     fun changePassword(currentPassword: String, newPassword: String) {

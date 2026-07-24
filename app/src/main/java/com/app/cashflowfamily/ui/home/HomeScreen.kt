@@ -18,7 +18,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Message
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Insights
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Notifications
@@ -30,7 +29,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -129,6 +127,7 @@ fun HomeScreen(
                     ) {
                         UserAvatar(
                             name = uiState.user?.name ?: "?",
+                            photoUrl = uiState.user?.photoUrl,
                             size = 36.dp,
                             backgroundColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
                             textColor = MaterialTheme.colorScheme.primary
@@ -287,18 +286,10 @@ fun HomeScreen(
                     actionIconContentColor = MaterialTheme.colorScheme.primary
                 )
             )
-        },
-        floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = {
-                    rootNavController.navigate(Screen.AddTransaction.route)
-                },
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-                icon = { Icon(Icons.Filled.Add, contentDescription = null) },
-                text = { Text("Tambah Transaksi") }
-            )
         }
+        // Tombol "Tambah Transaksi" dipindahkan ke bottom navigation bar
+        // (lihat MainScreen.FloatingBottomBar) supaya tidak lagi menutupi
+        // list transaksi di halaman Beranda.
     ) { paddingValues ->
         Box(
             modifier = Modifier
@@ -408,7 +399,8 @@ fun HomeScreen(
                             }
 
                             item {
-                                Spacer(modifier = Modifier.height(80.dp))
+                                // Sedikit ruang di bawah list (FAB sudah dipindahkan ke bottom navbar)
+                                Spacer(modifier = Modifier.height(24.dp))
                             }
                         }
                     }

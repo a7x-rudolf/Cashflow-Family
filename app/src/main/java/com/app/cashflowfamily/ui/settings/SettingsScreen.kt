@@ -33,6 +33,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -49,7 +50,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -86,6 +86,23 @@ import androidx.compose.material3.IconButton
 import androidx.compose.ui.Alignment
 import com.app.cashflowfamily.viewmodel.UpdateViewModel
 import kotlinx.coroutines.delay
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.DeleteOutline
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import com.app.cashflowfamily.ui.components.UserAvatar
+import com.app.cashflowfamily.utils.ImageUtils
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 // ===== TIDAK ADA IMPORT BuildConfig! =====
 
@@ -110,8 +127,38 @@ fun SettingsScreen(
     val uiState by settingsViewModel.uiState.collectAsState()
     val updateNameState by settingsViewModel.updateNameState.collectAsState()
     val changePasswordState by settingsViewModel.changePasswordState.collectAsState()
+    val updatePhotoState by settingsViewModel.updatePhotoState.collectAsState()
     val themeMode by themeViewModel.themeMode.collectAsState()
     val passwordChangedSuccessfully by settingsViewModel.passwordChangedSuccessfully.collectAsState()
+
+    val coroutineScope = rememberCoroutineScope()
+    var isProcessingPhoto by remember { mutableStateOf(false) }
+
+    // Photo Picker bawaan Android - tidak perlu izin storage runtime
+    val photoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        if (uri != null) {
+            isProcessingPhoto = true
+            coroutineScope.launch {
+                val dataUri = withContext(Dispatchers.IO) {
+                    ImageUtils.compressImageToDataUri(context, uri)
+                }
+                isProcessingPhoto = false
+                if (dataUri != null) {
+                    settingsViewModel.updatePhoto(dataUri)
+                } else {
+                    Toast.makeText(context, "Gagal memproses foto, coba foto lain", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    val onPickPhoto: () -> Unit = {
+        photoPickerLauncher.launch(
+            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+        )
+    }
 
     // ===== UPDATE STATE =====
     val updateInfo by updateViewModel.updateInfo.collectAsState()
@@ -168,6 +215,25 @@ fun SettingsScreen(
                     Toast.LENGTH_LONG
                 ).show()
                 settingsViewModel.resetUpdateNameState()
+            }
+            else -> {}
+        }
+    }
+
+    // Handle update photo result
+    LaunchedEffect(updatePhotoState) {
+        when (updatePhotoState) {
+            is Resource.Success -> {
+                Toast.makeText(context, "Foto profil diperbarui", Toast.LENGTH_SHORT).show()
+                settingsViewModel.resetUpdatePhotoState()
+            }
+            is Resource.Error -> {
+                Toast.makeText(
+                    context,
+                    (updatePhotoState as Resource.Error).message,
+                    Toast.LENGTH_LONG
+                ).show()
+                settingsViewModel.resetUpdatePhotoState()
             }
             else -> {}
         }
@@ -351,7 +417,10 @@ fun SettingsScreen(
                         userName = uiState.user?.name ?: "-",
                         userEmail = uiState.user?.email ?: "-",
                         userRole = uiState.user?.role ?: "member",
-                        familyName = uiState.family?.familyName
+                        familyName = uiState.family?.familyName,
+                        photoUrl = uiState.user?.photoUrl,
+                        isPhotoLoading = isProcessingPhoto,
+                        onEditPhotoClick = onPickPhoto
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -365,6 +434,26 @@ fun SettingsScreen(
                         subtitle = "Ubah nama Anda",
                         onClick = { showEditNameDialog = true }
                     )
+
+                    SettingsItem(
+                        icon = Icons.Filled.CameraAlt,
+                        title = "Ganti Foto Profil",
+                        subtitle = when {
+                            ImageUtils.isDataUri(uiState.user?.photoUrl ?: "") -> "Menggunakan foto kustom"
+                            ImageUtils.isHttpUrl(uiState.user?.photoUrl ?: "") -> "Menggunakan foto akun Google"
+                            else -> "Belum ada foto, pakai avatar inisial"
+                        },
+                        onClick = onPickPhoto
+                    )
+
+                    if (ImageUtils.isDataUri(uiState.user?.photoUrl ?: "")) {
+                        SettingsItem(
+                            icon = Icons.Filled.DeleteOutline,
+                            title = "Hapus Foto Profil",
+                            subtitle = "Kembali ke avatar inisial",
+                            onClick = { settingsViewModel.removePhoto() }
+                        )
+                    }
 
                     SettingsItem(
                         icon = Icons.Filled.Lock,
@@ -508,7 +597,7 @@ fun SettingsScreen(
                         onClick = {
                             if (!isChecking) {
                                 showLatestVersionStatus = false
-                                updateViewModel.checkForUpdate()
+                                updateViewModel.checkForUpdate(silent = false)
                             }
                         }
                     )
@@ -681,39 +770,86 @@ private fun ProfileCard(
     userName: String,
     userEmail: String,
     userRole: String,
-    familyName: String?
+    familyName: String?,
+    photoUrl: String?,
+    isPhotoLoading: Boolean,
+    onEditPhotoClick: () -> Unit
 ) {
-    val initial = userName.firstOrNull()?.uppercaseChar()?.toString() ?: "?"
     val isAdmin = userRole == "admin"
+    val avatarSize = 76.dp
+    val badgeSize = 28.dp
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
-        )
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .background(
+                    Brush.linearGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.primary,
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.82f)
+                        ),
+                        start = Offset(0f, 0f),
+                        end = Offset(1000f, 1000f)
+                    )
+                )
+                .padding(18.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
-                modifier = Modifier
-                    .size(64.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary),
+                modifier = Modifier.size(avatarSize + 8.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = initial,
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
+                Box(
+                    modifier = Modifier
+                        .size(avatarSize)
+                        .clip(CircleShape)
+                        .border(2.dp, Color.White.copy(alpha = 0.6f), CircleShape)
+                        .padding(3.dp)
+                ) {
+                    UserAvatar(
+                        name = userName,
+                        photoUrl = photoUrl,
+                        size = avatarSize - 6.dp,
+                        backgroundColor = Color.White.copy(alpha = 0.22f),
+                        textColor = Color.White
+                    )
+                }
+
+                // Badge edit foto — nempel di sudut kanan-bawah avatar
+                Surface(
+                    onClick = onEditPhotoClick,
+                    shape = CircleShape,
+                    color = Color.White,
+                    shadowElevation = 3.dp,
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .size(badgeSize)
+                ) {
+                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                        if (isPhotoLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(14.dp),
+                                strokeWidth = 2.dp,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Filled.CameraAlt,
+                                contentDescription = "Ganti foto profil",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(15.dp)
+                            )
+                        }
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.width(16.dp))
@@ -723,27 +859,58 @@ private fun ProfileCard(
                     text = userName,
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                    color = Color.White
                 )
 
                 Text(
                     text = userEmail,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                    color = Color.White.copy(alpha = 0.85f)
                 )
 
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-                Text(
-                    text = buildString {
-                        append(if (isAdmin) "Admin" else "Member")
-                        if (familyName != null) {
-                            append(" · $familyName")
-                        }
-                    },
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
-                )
+                Row {
+                    AssistChip(
+                        onClick = {},
+                        enabled = false,
+                        label = {
+                            Text(
+                                text = if (isAdmin) "Admin" else "Member",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        },
+                        colors = AssistChipDefaults.assistChipColors(
+                            disabledContainerColor = Color.White.copy(alpha = 0.18f),
+                            disabledLabelColor = Color.White
+                        ),
+                        border = BorderStroke(0.dp, Color.Transparent),
+                        modifier = Modifier.height(26.dp)
+                    )
+
+                    if (familyName != null) {
+                        Spacer(modifier = Modifier.width(6.dp))
+                        AssistChip(
+                            onClick = {},
+                            enabled = false,
+                            label = {
+                                Text(
+                                    text = familyName,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.SemiBold,
+                                    maxLines = 1
+                                )
+                            },
+                            colors = AssistChipDefaults.assistChipColors(
+                                disabledContainerColor = Color.White.copy(alpha = 0.18f),
+                                disabledLabelColor = Color.White
+                            ),
+                            border = BorderStroke(0.dp, Color.Transparent),
+                            modifier = Modifier.height(26.dp)
+                        )
+                    }
+                }
             }
         }
     }
