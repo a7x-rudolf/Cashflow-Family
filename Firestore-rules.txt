@@ -1,20 +1,7 @@
 rules_version = '2';
 
 // =====================================================================
-// Firestore Security Rules - CashflowFamily (FIXED)
-//
-// Perubahan penting dibanding versi sebelumnya:
-//  1. users/update: self-edit TIDAK bisa lagi mengubah role/familyId
-//     bebas. Ubah role/familyId sendiri hanya boleh kalau memang sudah
-//     tercatat sebagai member sah di families/{id}.members (join/leave),
-//     atau dilakukan oleh admin family yang sama (kick/promote).
-//  2. families/update (join): ditambah get() untuk memastikan hanya
-//     dipakai sesuai pola app; families/{id} dipisah jadi "get" vs
-//     "list" supaya koleksi family TIDAK BISA di-dump (list dibatasi
-//     limit(1), sama seperti pola query FamilyRepository.joinFamily).
-//  3. notifications/create: divalidasi familyId requester.
-//  4. transactions/budgets/recurring update: field familyId & userId
-//     dikunci (tidak bisa diubah lewat update).
+// Firestore Security Rules - CashflowFamily
 // =====================================================================
 
 service cloud.firestore {
@@ -63,7 +50,6 @@ service cloud.firestore {
             && exists(/databases/$(database)/documents/users/$(userId))
             && isSameFamily(resource.data.familyId));
 
-      // role & familyId WAJIB default saat create (tidak boleh langsung admin/gabung family)
       allow create: if isOwner(userId)
         && request.resource.data.userId == userId
         && request.resource.data.role == "member"
@@ -74,15 +60,22 @@ service cloud.firestore {
           (request.resource.data.role == resource.data.role
             && request.resource.data.familyId == resource.data.familyId)
           ||
-          // (b) self join/leave: role harus tetap "member", dan familyId baru
-          //     harus valid (kosong = leave, atau family yang membership-nya
-          //     SUDAH tercatat di families/{id}.members = join setelah arrayUnion)
+          // (b) self join/leave sebagai member biasa
           (request.resource.data.diff(resource.data).affectedKeys().hasOnly(["familyId", "role"])
             && request.resource.data.role == "member"
             && (request.resource.data.familyId == "" || isRealMember(request.resource.data.familyId)))
+          ||
+          // (b2) self create family: promote diri jadi admin,
+          //      HANYA jika user adalah ownerId dari family target
+          (request.resource.data.diff(resource.data).affectedKeys().hasOnly(["familyId", "role"])
+            && request.resource.data.role == "admin"
+            && request.resource.data.familyId != ""
+            && exists(/databases/$(database)/documents/families/$(request.resource.data.familyId))
+            && get(/databases/$(database)/documents/families/$(request.resource.data.familyId)).data.ownerId == request.auth.uid
+            && isRealMember(request.resource.data.familyId))
         )
         ||
-        // (c) admin family yang sama mengubah familyId/role anggota LAIN (kick/promote)
+        // (c) admin family yang sama mengubah familyId/role anggota LAIN
         (isMyAdmin()
           && isSameFamily(resource.data.familyId)
           && userId != request.auth.uid
