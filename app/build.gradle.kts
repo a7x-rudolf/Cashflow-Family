@@ -37,8 +37,8 @@ android {
         minSdk = 26
         //noinspection OldTargetApi
         targetSdk = 35
-        versionCode = 6
-        versionName = "1.0.2"
+        versionCode = 7
+        versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -200,4 +200,7 @@ dependencies {
     // Firebase Cloud Messaging (Push Notification)
     //noinspection UseTomlInstead,GradleDependency
     implementation("com.google.firebase:firebase-messaging-ktx:23.4.1")
+
+    // Coil - image loading (foto profil dari URL Google & Bitmap hasil upload manual)
+    implementation("io.coil-kt:coil-compose:2.7.0")
 }

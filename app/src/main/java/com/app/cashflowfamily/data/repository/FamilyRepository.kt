@@ -35,6 +35,7 @@ class FamilyRepository @Inject constructor(
                 // Cek apakah kode sudah digunakan
                 val existing = firestore.collection("families")
                     .whereEqualTo("familyCode", familyCode)
+                    .limit(1)
                     .get()
                     .await()
                 isCodeUnique = existing.isEmpty
@@ -80,6 +81,7 @@ class FamilyRepository @Inject constructor(
             // Cari family berdasarkan kode
             val querySnapshot = firestore.collection("families")
                 .whereEqualTo("familyCode", familyCode.uppercase())
+                .limit(1)
                 .get()
                 .await()
 

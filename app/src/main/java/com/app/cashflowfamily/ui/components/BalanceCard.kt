@@ -1,7 +1,10 @@
 package com.app.cashflowfamily.ui.components
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -23,11 +26,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.app.cashflowfamily.ui.theme.BlueSecondary
+import com.app.cashflowfamily.ui.theme.BlueSecondaryDark
+import com.app.cashflowfamily.ui.theme.BlueSecondaryLight
+import com.app.cashflowfamily.ui.theme.GreenPrimary
+import com.app.cashflowfamily.ui.theme.GreenPrimaryDark
 import com.app.cashflowfamily.utils.CurrencyFormatter
 import com.app.cashflowfamily.utils.DateFormatter
 
@@ -43,77 +55,159 @@ fun BalanceCard(
 
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color.Transparent
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
     ) {
-        Column(
+        Box(
             modifier = Modifier
+                .fillMaxWidth()
                 .background(
                     brush = Brush.linearGradient(
                         colors = listOf(
-                            MaterialTheme.colorScheme.primary,
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.85f)
-                        )
+                            GreenPrimaryDark,
+                            GreenPrimary,
+                            BlueSecondary
+                        ),
+                        start = Offset(0f, 0f),
+                        end = Offset(1200f, 1200f)
                     )
                 )
-                .padding(20.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            // Dekorasi garis abstrak + glow di belakang konten
+            AbstractWaveDecoration(modifier = Modifier.matchParentSize())
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(22.dp)
             ) {
-                Column {
-                    Text(
-                        text = if (isCurrentMonth) "Saldo Bulan Ini" else "Saldo",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            text = if (isCurrentMonth) "Saldo Bulan Ini" else "Saldo",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = Color.White.copy(alpha = 0.85f)
+                        )
+
+                        Text(
+                            text = DateFormatter.formatMonthYear(monthTimestamp),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.White.copy(alpha = 0.65f)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Text(
+                    text = CurrencyFormatter.formatRupiah(balance),
+                    fontSize = 34.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.3.sp,
+                    color = Color.White
+                )
+
+                Spacer(modifier = Modifier.height(22.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    IncomeExpenseItem(
+                        icon = Icons.Filled.ArrowDownward,
+                        label = "Pemasukan",
+                        amount = income,
+                        iconColor = Color(0xFF81C784),
+                        modifier = Modifier.weight(1f)
                     )
 
-                    Text(
-                        text = DateFormatter.formatMonthYear(monthTimestamp),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    IncomeExpenseItem(
+                        icon = Icons.Filled.ArrowUpward,
+                        label = "Pengeluaran",
+                        amount = expense,
+                        iconColor = Color(0xFFEF9A9A),
+                        modifier = Modifier.weight(1f)
                     )
                 }
             }
+        }
+    }
+}
 
-            Spacer(modifier = Modifier.height(8.dp))
+/**
+ * Dekorasi visual berupa garis-garis wave abstrak yang tipis dan transparan,
+ * plus dua "glow" blob halus di pojok, supaya card terasa lebih premium
+ * tanpa mengganggu keterbacaan konten di atasnya.
+ */
+@Composable
+private fun AbstractWaveDecoration(modifier: Modifier = Modifier) {
+    Canvas(modifier = modifier) {
+        val w = size.width
+        val h = size.height
 
-            Text(
-                text = CurrencyFormatter.formatRupiah(balance),
-                fontSize = 32.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onPrimary
-            )
+        // Glow blob pojok kanan atas
+        drawCircle(
+            brush = Brush.radialGradient(
+                colors = listOf(
+                    BlueSecondaryLight.copy(alpha = 0.35f),
+                    Color.Transparent
+                ),
+                center = Offset(w * 0.92f, h * 0.05f),
+                radius = w * 0.55f
+            ),
+            radius = w * 0.55f,
+            center = Offset(w * 0.92f, h * 0.05f)
+        )
 
-            Spacer(modifier = Modifier.height(20.dp))
+        // Glow blob pojok kiri bawah
+        drawCircle(
+            brush = Brush.radialGradient(
+                colors = listOf(
+                    BlueSecondaryDark.copy(alpha = 0.30f),
+                    Color.Transparent
+                ),
+                center = Offset(w * 0.02f, h * 1.05f),
+                radius = w * 0.6f
+            ),
+            radius = w * 0.6f,
+            center = Offset(w * 0.02f, h * 1.05f)
+        )
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                IncomeExpenseItem(
-                    icon = Icons.Filled.ArrowDownward,
-                    label = "Pemasukan",
-                    amount = income,
-                    iconColor = Color(0xFF81C784),
-                    modifier = Modifier.weight(1f)
+        // Garis-garis wave abstrak, tipis & semi-transparan
+        val waveConfigs = listOf(
+            Triple(h * 0.30f, h * 0.10f, 0.16f),
+            Triple(h * 0.55f, h * 0.14f, 0.12f),
+            Triple(h * 0.80f, h * 0.09f, 0.09f)
+        )
+
+        waveConfigs.forEach { (baseY, amplitude, alpha) ->
+            val path = Path().apply {
+                moveTo(-w * 0.1f, baseY)
+                cubicTo(
+                    w * 0.2f, baseY - amplitude,
+                    w * 0.35f, baseY + amplitude,
+                    w * 0.6f, baseY
                 )
-
-                Spacer(modifier = Modifier.width(12.dp))
-
-                IncomeExpenseItem(
-                    icon = Icons.Filled.ArrowUpward,
-                    label = "Pengeluaran",
-                    amount = expense,
-                    iconColor = Color(0xFFE57373),
-                    modifier = Modifier.weight(1f)
+                cubicTo(
+                    w * 0.8f, baseY - amplitude * 0.8f,
+                    w * 0.95f, baseY + amplitude * 0.6f,
+                    w * 1.15f, baseY - amplitude * 0.3f
                 )
             }
+            drawPath(
+                path = path,
+                color = Color.White.copy(alpha = alpha),
+                style = Stroke(width = 1.4.dp.toPx(), cap = StrokeCap.Round)
+            )
         }
     }
 }
@@ -128,8 +222,9 @@ private fun IncomeExpenseItem(
 ) {
     Row(
         modifier = modifier
-            .clip(RoundedCornerShape(12.dp))
-            .background(MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.15f))
+            .clip(RoundedCornerShape(14.dp))
+            .background(Color.White.copy(alpha = 0.14f))
+            .border(1.dp, Color.White.copy(alpha = 0.14f), RoundedCornerShape(14.dp))
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -146,14 +241,14 @@ private fun IncomeExpenseItem(
             Text(
                 text = label,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f)
+                color = Color.White.copy(alpha = 0.85f)
             )
 
             Text(
                 text = CurrencyFormatter.formatRupiah(amount),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onPrimary
+                color = Color.White
             )
         }
     }

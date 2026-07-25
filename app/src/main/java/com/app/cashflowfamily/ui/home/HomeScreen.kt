@@ -18,7 +18,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Message
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Insights
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Notifications
@@ -30,7 +29,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -61,12 +59,16 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.app.cashflowfamily.ui.components.BalanceCardPager
 import com.app.cashflowfamily.ui.components.EmptyState
+import com.app.cashflowfamily.ui.components.HomeInsightWaveCard
 import com.app.cashflowfamily.ui.components.TransactionItem
 import com.app.cashflowfamily.ui.components.UserAvatar
 import com.app.cashflowfamily.ui.navigation.Screen
 import com.app.cashflowfamily.utils.DateFormatter
 import com.app.cashflowfamily.viewmodel.HomeViewModel
+import com.app.cashflowfamily.viewmodel.InsightType
+import com.app.cashflowfamily.viewmodel.MonthData
 import com.app.cashflowfamily.viewmodel.NotificationViewModel
+import kotlin.math.abs
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -129,6 +131,7 @@ fun HomeScreen(
                     ) {
                         UserAvatar(
                             name = uiState.user?.name ?: "?",
+                            photoUrl = uiState.user?.photoUrl,
                             size = 36.dp,
                             backgroundColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
                             textColor = MaterialTheme.colorScheme.primary
@@ -287,18 +290,10 @@ fun HomeScreen(
                     actionIconContentColor = MaterialTheme.colorScheme.primary
                 )
             )
-        },
-        floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = {
-                    rootNavController.navigate(Screen.AddTransaction.route)
-                },
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-                icon = { Icon(Icons.Filled.Add, contentDescription = null) },
-                text = { Text("Tambah Transaksi") }
-            )
         }
+        // Tombol "Tambah Transaksi" dipindahkan ke bottom navigation bar
+        // (lihat MainScreen.FloatingBottomBar) supaya tidak lagi menutupi
+        // list transaksi di halaman Beranda.
     ) { paddingValues ->
         Box(
             modifier = Modifier
@@ -327,6 +322,27 @@ fun HomeScreen(
                                 selectedPageIndex = newPage
                             }
                         )
+
+                        // ===== INSIGHT ANALYTICS RINGKAS (wave chart) =====
+                        if (uiState.monthDataList.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            val (insightTitle, insightDescription, insightType) =
+                                remember(uiState.monthDataList) {
+                                    buildHomeInsight(uiState.monthDataList)
+                                }
+                            val trendValues = remember(uiState.monthDataList) {
+                                uiState.monthDataList.takeLast(6).map { it.balance }
+                            }
+
+                            HomeInsightWaveCard(
+                                trendValues = trendValues,
+                                insightTitle = insightTitle,
+                                insightDescription = insightDescription,
+                                insightType = insightType,
+                                onClick = { rootNavController.navigate(Screen.Analytics.route) }
+                            )
+                        }
 
                         Spacer(modifier = Modifier.height(16.dp))
 
@@ -408,12 +424,78 @@ fun HomeScreen(
                             }
 
                             item {
-                                Spacer(modifier = Modifier.height(80.dp))
+                                // Sedikit ruang di bawah list (FAB sudah dipindahkan ke bottom navbar)
+                                Spacer(modifier = Modifier.height(24.dp))
                             }
                         }
                     }
                 }
             }
         }
+    }
+}
+
+/**
+ * Menentukan satu insight utama untuk ditampilkan di Beranda, berdasarkan
+ * data bulan berjalan dan perbandingan dengan bulan sebelumnya.
+ * Versi ringkas dari logika insight yang ada di halaman Analytics.
+ */
+private fun buildHomeInsight(monthDataList: List<MonthData>): Triple<String, String, InsightType> {
+    val current = monthDataList.lastOrNull()
+        ?: return Triple(
+            "Belum Ada Data",
+            "Mulai catat transaksi untuk melihat insight.",
+            InsightType.INFO
+        )
+
+    if (current.transactions.isEmpty()) {
+        return Triple(
+            "Belum Ada Transaksi",
+            "Belum ada transaksi tercatat bulan ini.",
+            InsightType.INFO
+        )
+    }
+
+    // Bandingkan pengeluaran dengan bulan lalu
+    val previous = monthDataList.getOrNull(monthDataList.size - 2)
+    if (previous != null && previous.expense > 0) {
+        val diff = current.expense - previous.expense
+        val percent = ((diff / previous.expense) * 100).toInt()
+
+        if (percent > 20) {
+            return Triple(
+                "Pengeluaran Meningkat",
+                "Naik $percent% dibanding bulan lalu.",
+                InsightType.WARNING
+            )
+        } else if (percent < -20) {
+            return Triple(
+                "Hemat Bulan Ini",
+                "Pengeluaran turun ${abs(percent)}% dibanding bulan lalu.",
+                InsightType.POSITIVE
+            )
+        }
+    }
+
+    // Fallback: status kesehatan saldo bulan ini
+    return when {
+        current.balance > 0 && current.income > 0 -> {
+            val ratio = (current.balance / current.income * 100).toInt()
+            Triple(
+                "Keuangan Sehat",
+                "Anda menyisihkan $ratio% dari pemasukan bulan ini.",
+                InsightType.POSITIVE
+            )
+        }
+        current.balance < 0 -> Triple(
+            "Pengeluaran Melebihi Pemasukan",
+            "Perlu evaluasi budget bulan ini.",
+            InsightType.WARNING
+        )
+        else -> Triple(
+            "Keseimbangan",
+            "Pemasukan dan pengeluaran seimbang bulan ini.",
+            InsightType.INFO
+        )
     }
 }

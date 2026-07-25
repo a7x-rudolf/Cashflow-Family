@@ -121,10 +121,22 @@ class AuthRepository @Inject constructor(
             val userDocRef = firestore.collection("users").document(userId)
             val existingDoc = userDocRef.get().await()
 
+            val googlePhotoUrl = firebaseUser.photoUrl?.toString() ?: ""
+
             val user = if (existingDoc.exists()) {
                 // User sudah pernah daftar sebelumnya
-                existingDoc.toObject(User::class.java)
+                val existingUser = existingDoc.toObject(User::class.java)
                     ?: return Result.failure(Exception("Data user tidak ditemukan"))
+
+                // Kalau user belum pernah punya foto sama sekali (belum pernah
+                // upload manual juga), isi otomatis dari foto akun Google.
+                // Kalau user sudah upload foto sendiri, jangan ditimpa otomatis.
+                if (existingUser.photoUrl.isBlank() && googlePhotoUrl.isNotBlank()) {
+                    userDocRef.update("photoUrl", googlePhotoUrl).await()
+                    existingUser.copy(photoUrl = googlePhotoUrl)
+                } else {
+                    existingUser
+                }
             } else {
                 // User baru login via Google, buat data user di Firestore
                 val newUser = User(
@@ -132,7 +144,8 @@ class AuthRepository @Inject constructor(
                     name = firebaseUser.displayName ?: "",
                     email = firebaseUser.email ?: "",
                     familyId = "",
-                    role = "member"
+                    role = "member",
+                    photoUrl = googlePhotoUrl
                 )
                 userDocRef.set(newUser).await()
                 newUser
@@ -179,6 +192,35 @@ class AuthRepository @Inject constructor(
             firestore.collection("users")
                 .document(userId)
                 .update("name", newName)
+                .await()
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // Update foto profil (dipanggil setelah foto dikompres jadi data URI base64
+    // oleh ImageUtils, lewat fitur "Ganti Foto Profil" di Setelan)
+    suspend fun updateUserPhoto(userId: String, photoDataUri: String): Result<Unit> {
+        return try {
+            firestore.collection("users")
+                .document(userId)
+                .update("photoUrl", photoDataUri)
+                .await()
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // Hapus foto profil custom -> kembali ke avatar inisial default
+    suspend fun removeUserPhoto(userId: String): Result<Unit> {
+        return try {
+            firestore.collection("users")
+                .document(userId)
+                .update("photoUrl", "")
                 .await()
 
             Result.success(Unit)

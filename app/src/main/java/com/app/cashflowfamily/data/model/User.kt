@@ -22,5 +22,12 @@ data class User(
     var createdAt: Long = System.currentTimeMillis(),
 
     @get:PropertyName("fcmToken") @set:PropertyName("fcmToken")
-    var fcmToken: String = ""
+    var fcmToken: String = "",
+
+    // Foto profil. Bisa berisi:
+    // - URL https dari foto akun Google (saat login/daftar via Google)
+    // - Data URI base64 ("data:image/jpeg;base64,...") saat user upload foto manual
+    // - String kosong -> tampilkan avatar inisial (default)
+    @get:PropertyName("photoUrl") @set:PropertyName("photoUrl")
+    var photoUrl: String = ""
 )

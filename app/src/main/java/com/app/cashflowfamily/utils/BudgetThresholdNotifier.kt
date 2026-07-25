@@ -1,3 +1,5 @@
+@file:Suppress("AddExplicitTargetToParameterAnnotation")
+
 package com.app.cashflowfamily.utils
 
 import android.content.Context
@@ -13,22 +15,6 @@ import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * Helper terpusat untuk mengecek apakah pengeluaran (baru / diedit / hasil
- * recurring) membuat budget kategori tertentu melewati ambang batas
- * (80% = warning, 100% = over), lalu mengirim notifikasi (system + in-app)
- * ke semua anggota keluarga.
- *
- * Dipakai dari 3 tempat:
- *  - AddTransactionViewModel        -> transaksi baru dari form
- *  - TransactionDetailViewModel     -> transaksi yang diedit
- *  - RecurringRepository            -> transaksi hasil auto-generate recurring
- *
- * Supaya tidak spam notifikasi berulang untuk kategori & bulan yang sama,
- * tier threshold yang sudah dikirim dicatat di Budget.lastNotifiedPercentage.
- * Field ini otomatis "reset" tiap bulan karena Budget adalah dokumen baru
- * per month/year (lihat BudgetRepository.addBudget).
- */
 @Singleton
 class BudgetThresholdNotifier @Inject constructor(
     private val budgetRepository: BudgetRepository,
@@ -39,17 +25,12 @@ class BudgetThresholdNotifier @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
 
-    /**
-     * Panggil ini setiap kali sebuah transaksi expense dibuat, diedit,
-     * atau di-generate otomatis dari recurring.
-     */
     suspend fun checkAndNotify(
         familyId: String,
         category: String,
         type: String,
         date: Long
     ) {
-        // Cuma pengeluaran yang relevan untuk budget
         if (type != "expense" || familyId.isBlank() || category.isBlank()) return
 
         try {
@@ -72,8 +53,8 @@ class BudgetThresholdNotifier @Inject constructor(
             val spent = transactions
                 .filter {
                     it.type == "expense" &&
-                        it.category == category &&
-                        DateFormatter.isSameMonth(it.date, date)
+                            it.category == category &&
+                            DateFormatter.isSameMonth(it.date, date)
                 }
                 .sumOf { it.amount }
 
@@ -85,8 +66,6 @@ class BudgetThresholdNotifier @Inject constructor(
                 else -> 0
             }
 
-            // Belum lewat threshold manapun, atau tier ini (atau yang lebih
-            // tinggi) sudah pernah dikirim bulan ini -> jangan kirim lagi.
             if (tier == 0 || tier <= budget.lastNotifiedPercentage) return
 
             val isOver = tier >= 100
@@ -123,12 +102,9 @@ class BudgetThresholdNotifier @Inject constructor(
                 isOver = isOver
             )
 
-            // Catat tier ini supaya tidak dikirim ulang bulan ini.
             budgetRepository.updateNotifiedPercentage(budget.budgetId, tier)
 
         } catch (e: Exception) {
-            // Notifikasi budget tidak boleh sampai menggagalkan alur simpan
-            // transaksi utama, jadi errornya cukup dicatat saja.
             Log.e("BudgetThresholdNotifier", "Error checking budget threshold", e)
         }
     }
@@ -173,6 +149,19 @@ class BudgetThresholdNotifier @Inject constructor(
         }
 
         notificationRepository.addNotifications(notifications)
+            .onSuccess { savedNotifications ->
+                // ===== PUSH NOTIFICATION (FCM lewat push-server) =====
+                // Untuk budget, semua member relevan termasuk pembuat transaksi
+                // (dia yang bikin transaksi tapi belum tentu lagi lihat layar HP-nya).
+                PushNotifier.notify(
+                    recipientUserIds = family.members,
+                    actorUserId = "",
+                    type = if (isOver) "budget_over" else "budget_warning",
+                    title = title,
+                    message = message,
+                    notificationId = savedNotifications.firstOrNull()?.notificationId.orEmpty()
+                )
+            }
             .onFailure { error ->
                 Log.e("BudgetThresholdNotifier", "Failed to send in-app notifications", error)
             }

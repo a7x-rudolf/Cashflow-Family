@@ -79,4 +79,8 @@ gradle.properties~
 
 # Node dependencies
 node_modules/
-functions/node_modules/push-server/ 
+functions/node_modules/
+
+# push-server is its own separate repo/deployment (cashflow-push-server on GitHub),
+# not part of this Android project
+push-server/
