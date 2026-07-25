@@ -1,6 +1,6 @@
 <div align="center">
 
-# <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=100&section=header&text=Cashflow%20Family&fontSize=32&fontColor=fff&animation=fadeIn" width="100%" />
+# <img src="https://capsule-render.vercel.app/api?type=waving&color=0:3b82f6,100:60a5fa&height=100&section=header&text=Cashflow%20Family&fontSize=32&fontColor=fff&animation=fadeIn" width="100%" />
 
 ### Aplikasi Manajemen Keuangan Keluarga
 
