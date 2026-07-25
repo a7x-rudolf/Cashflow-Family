@@ -1,56 +1,87 @@
-# Cashflow Family — Android
+```
+┌────────────────────────────────────────────────┐
+│                                                  │
+│   CASHFLOW FAMILY  —  ANDROID                   │
+│                                                  │
+└────────────────────────────────────────────────┘
+```
 
-Versi Android dari aplikasi Cashflow Family, sebuah aplikasi manajemen keuangan keluarga. Cashflow Family membantu keluarga mengelola pemasukan, pengeluaran, dan budget bulanan bersama-sama dalam satu aplikasi.
+Versi Android dari **Cashflow Family** — aplikasi manajemen keuangan keluarga. Satu tempat untuk mencatat pemasukan, pengeluaran, dan budget bulanan, dikelola bersama-sama oleh seluruh anggota keluarga.
 
-## Fitur
+<br>
 
-- Catat transaksi (pemasukan & pengeluaran) dengan kategori
-- Kelola keluarga — undang anggota lewat kode undangan
-- Budget bulanan per kategori
-- Transaksi berulang (recurring) untuk gaji, tagihan, langganan
-- Notifikasi pengingat harian & peringatan budget
-- Login dengan fingerprint / biometric
-- Analitik & laporan pengeluaran keluarga
+### ────  fitur
 
-## Tech Stack
+```
+catat transaksi pemasukan & pengeluaran, per kategori
+kelola keluarga — undang anggota lewat kode undangan
+budget bulanan per kategori
+transaksi berulang — gaji, tagihan, langganan
+notifikasi pengingat harian & peringatan budget
+login dengan fingerprint / biometric
+analitik & laporan pengeluaran keluarga
+```
 
-- Kotlin + Jetpack Compose
-- Hilt untuk dependency injection
-- Firebase / Firestore sebagai backend (users, families, transactions, budgets, recurring_transactions)
-- MVVM architecture
+<br>
 
-## Setup
+### ────  stack
 
-Project ini membutuhkan file konfigurasi Firebase (`app/google-services.json`) dan keystore signing yang tidak disertakan di repo ini karena alasan keamanan. Untuk menjalankan project:
+`Kotlin` `Jetpack Compose` `Hilt` `Firebase / Firestore` `MVVM`
 
-1. Buat project Firebase sendiri di [Firebase Console](https://console.firebase.google.com/)
-2. Download `google-services.json` dan taruh di folder `app/`
-3. Isi `local.properties` dengan lokasi Android SDK kamu
+Firestore menyimpan struktur `users`, `families`, `transactions`, `budgets`, dan `recurring_transactions`.
 
-## Tampilan Aplikasi
+<br>
 
-| Beranda | Riwayat Transaksi | Tambah Transaksi |
-|---|---|---|
-| ![Beranda](docs/Screenshoot%20App/Beranda.jpeg) | ![Riwayat](docs/Screenshoot%20App/Riwayat.jpeg) | ![Tambah Transaksi](docs/Screenshoot%20App/Tambah-Transkasi.jpeg) |
+### ────  menjalankan project
 
-| Login Biometric | Notifikasi | Feedback |
-|---|---|---|
-| ![Biometric](docs/Screenshoot%20App/Biometric.jpeg) | ![Notifikasi](docs/Screenshoot%20App/Notifikasi.jpeg) | ![Feedback](docs/Screenshoot%20App/Feedback.jpeg) |
+File konfigurasi Firebase dan keystore signing sengaja tidak disertakan di repo ini.
+
+```
+1. buat project Firebase sendiri di Firebase Console
+2. unduh google-services.json, taruh di folder app/
+3. isi local.properties dengan lokasi Android SDK kamu
+```
+
+<br>
+
+### ────  tampilan
+
+<div align="center">
+
+| Beranda | Riwayat | Tambah Transaksi |
+|:---:|:---:|:---:|
+| <img src="docs/Screenshoot%20App/Beranda.jpeg" width="200"> | <img src="docs/Screenshoot%20App/Riwayat.jpeg" width="200"> | <img src="docs/Screenshoot%20App/Tambah-Transkasi.jpeg" width="200"> |
+
+| Biometric | Notifikasi | Feedback |
+|:---:|:---:|:---:|
+| <img src="docs/Screenshoot%20App/Biometric.jpeg" width="200"> | <img src="docs/Screenshoot%20App/Notifikasi.jpeg" width="200"> | <img src="docs/Screenshoot%20App/Feedback.jpeg" width="200"> |
 
 | Setelan | Tentang |
-|---|---|
-| ![Setelan](docs/Screenshoot%20App/Setelan.jpeg) | ![Tentang](docs/Screenshoot%20App/Tentang.jpeg) |
+|:---:|:---:|
+| <img src="docs/Screenshoot%20App/Setelan.jpeg" width="200"> | <img src="docs/Screenshoot%20App/Tentang.jpeg" width="200"> |
 
-## Status
+</div>
 
-Ready to download & install.
+<br>
 
-[Download APK](https://github.com/a7x-rudolf/Cashflow-Family/releases/download/v1.0.0/Cashflow.Family.apk)
+### ────  unduh
 
-## License
+Aplikasi siap dipasang.
 
-Lihat file [LICENSE](LICENSE). Kode ini bisa dilihat siapa saja untuk keperluan portofolio/referensi, tapi tidak boleh dipakai ulang, dimodifikasi, atau didistribusikan tanpa izin tertulis dari pemilik.
+**[→ Download APK](https://github.com/a7x-rudolf/Cashflow-Family/releases/download/v1.0.0/Cashflow.Family.apk)**
+
+<br>
+
+### ────  lisensi
+
+Kode ini terbuka untuk dilihat siapa saja sebagai bahan portofolio dan referensi. Tidak untuk dipakai ulang, dimodifikasi, atau didistribusikan tanpa izin tertulis dari pemilik — detail lengkap di [LICENSE](LICENSE).
+
+<br>
 
 ---
 
-Dibuat oleh [Ridolf Widi Alfisa Lumba](https://github.com/a7x-rudolf)
+<div align="center">
+
+dibuat oleh **[Ridolf Widi Alfisa Lumba](https://github.com/a7x-rudolf)**
+
+</div>
