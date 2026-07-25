@@ -1,10 +1,19 @@
 <div align="center">
 
-# Cashflow Family — Android
+# <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=100&section=header&text=Cashflow%20Family&fontSize=32&fontColor=fff&animation=fadeIn" width="100%" />
 
-Aplikasi manajemen keuangan keluarga yang dirancang untuk mengelola pemasukan, pengeluaran, dan anggaran bulanan secara kolaboratif bersama seluruh anggota keluarga.
+### Aplikasi Manajemen Keuangan Keluarga
 
-[Unduh APK](#-unduh) · [Fitur](#-fitur) · [Teknologi](#-teknologi) · [Instalasi](#-persiapan-menjalankan-proyek)
+<p align="center">
+  Kelola pemasukan, pengeluaran, dan anggaran bulanan secara kolaboratif bersama seluruh anggota keluarga.
+</p>
+
+<p align="center">
+  <a href="https://github.com/a7x-rudolf/Cashflow-Family/releases/download/v1.0.0/Cashflow.Family.v1.0.0.apk"><code>[ Unduh APK ]</code></a> &nbsp;&bull;&nbsp;
+  <a href="#-fitur-utama"><code>[ Fitur ]</code></a> &nbsp;&bull;&nbsp;
+  <a href="#-teknologi-yang-digunakan"><code>[ Teknologi ]</code></a> &nbsp;&bull;&nbsp;
+  <a href="#-persiapan-menjalankan-proyek"><code>[ Instalasi ]</code></a>
+</p>
 
 </div>
 
