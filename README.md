@@ -1,193 +1,245 @@
 # Cashflow Family
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Platform-Android-3DDC84?logo=android&logoColor=white" alt="Platform"/>
-  <img src="https://img.shields.io/badge/Language-Kotlin-7F52FF?logo=kotlin&logoColor=white" alt="Kotlin"/>
-  <img src="https://img.shields.io/badge/UI-Jetpack%20Compose-4285F4?logo=jetpackcompose&logoColor=white" alt="Compose"/>
-  <img src="https://img.shields.io/badge/Backend-Firebase-FFCA28?logo=firebase&logoColor=black" alt="Firebase"/>
-  <img src="https://img.shields.io/badge/Version-1.0.0-blue" alt="Version"/>
+  <img src="https://img.shields.io/badge/Platform-Android-3DDC84?logo=android&logoColor=white" alt="Android">
+  <img src="https://img.shields.io/badge/Language-Kotlin-7F52FF?logo=kotlin&logoColor=white" alt="Kotlin">
+  <img src="https://img.shields.io/badge/UI-Jetpack%20Compose-4285F4?logo=jetpackcompose&logoColor=white" alt="Jetpack Compose">
+  <img src="https://img.shields.io/badge/Backend-Firebase-FFCA28?logo=firebase&logoColor=black" alt="Firebase">
+  <img src="https://img.shields.io/badge/Version-1.0.0-blue" alt="Version">
 </p>
 
-Aplikasi Android untuk manajemen keuangan keluarga dengan sinkronisasi real-time.
-
-Cashflow Family membantu anggota keluarga mencatat pemasukan, pengeluaran, dan mengatur budget bulanan bersama-sama dalam satu aplikasi. Semua data tersinkronisasi secara real-time antar anggota melalui Firebase, sehingga setiap perubahan langsung terlihat oleh seluruh keluarga.
+<p align="center">
+  Android application for collaborative family financial management with real-time synchronization.
+</p>
 
 ---
 
-## Daftar Isi
+## Table of Contents
 
-- [Fitur Utama](#fitur-utama)
-- [Tech Stack](#tech-stack)
-- [Struktur Project](#struktur-project)
+- [Features](#features)
+- [Technology Stack](#technology-stack)
+- [Project Structure](#project-structure)
 - [Setup](#setup)
-- [Tampilan Aplikasi](#tampilan-aplikasi)
+- [Application Screenshots](#application-screenshots)
 - [Download](#download)
-- [Lisensi](#lisensi)
+- [License](#license)
 
 ---
 
-## Fitur Utama
+## Features
 
-**Manajemen Transaksi**
-- Pencatatan pemasukan dan pengeluaran dengan kategori
-- Transaksi berulang (recurring) untuk gaji, tagihan, dan langganan
-- Riwayat transaksi lengkap dengan filter dan pencarian
+### Transaction Management
 
-**Kolaborasi Keluarga**
-- Sistem kode keluarga untuk mengundang anggota
-- Sinkronisasi real-time antar semua anggota keluarga
-- Manajemen anggota dengan role dan akses yang jelas
+- Record income and expenses
+- Organize transactions by category
+- Complete transaction history
+- Search and filter transactions
+- Recurring transactions
 
-**Budgeting**
-- Budget bulanan per kategori
-- Peringatan otomatis saat mendekati atau melewati batas anggaran
-- Visualisasi progres budget secara real-time
+### Family Collaboration
 
-**Notifikasi & Keamanan**
-- Push notification real-time via Firebase Cloud Messaging
-- Notifikasi tetap terkirim meskipun aplikasi tertutup
-- Autentikasi biometrik (fingerprint/face unlock)
-- Pengecekan pembaruan aplikasi otomatis
+- Join using a family invitation code
+- Real-time synchronization across all members
+- Family member management
+- Administrator and member roles
+
+### Budget Management
+
+- Monthly budget for each category
+- Real-time budget progress
+- Budget warning notifications
+
+### Notifications and Security
+
+- Firebase Cloud Messaging push notifications
+- Notifications received even when the application is closed
+- Google Sign-In
+- Biometric authentication
+- Automatic application update checking
 
 ---
 
-## Tech Stack
+## Technology Stack
 
 ### Android Application
 
-| Kategori          | Teknologi                          |
-| ----------------- | ---------------------------------- |
-| Bahasa            | Kotlin                             |
-| UI Framework      | Jetpack Compose (Material 3)       |
-| Arsitektur        | MVVM                               |
-| Dependency Inj.   | Hilt                               |
-| Autentikasi       | Firebase Auth                      |
-| Database          | Cloud Firestore                    |
-| Notifikasi        | Firebase Cloud Messaging           |
-| Image Loading     | Coil                               |
-| Min SDK           | 26 (Android 8.0)                   |
-| Target SDK        | 35 (Android 15)                    |
+| Category | Technology |
+|----------|------------|
+| Language | Kotlin |
+| UI Framework | Jetpack Compose (Material 3) |
+| Architecture | MVVM |
+| Dependency Injection | Hilt |
+| Authentication | Firebase Authentication |
+| Database | Cloud Firestore |
+| Notifications | Firebase Cloud Messaging |
+| Image Loading | Coil |
+| Minimum SDK | Android 8.0 (API 26) |
+| Target SDK | Android 15 (API 35) |
 
 ### Backend
 
-| Kategori           | Teknologi                          |
-| ------------------ | ---------------------------------- |
-| Cloud Functions    | TypeScript (Firebase Functions)    |
-| Security Rules     | Firestore Security Rules           |
-| Push Delivery      | Firebase Admin SDK                 |
+| Category | Technology |
+|----------|------------|
+| Cloud Functions | TypeScript |
+| Push Notification Service | Firebase Admin SDK |
+| Security | Firestore Security Rules |
 
-Cloud Functions bertugas mengirimkan push notification ke seluruh anggota keluarga ketika terjadi aktivitas baru (transaksi, perubahan budget, dsb.), bahkan saat aplikasi mereka dalam kondisi tertutup.
+Cloud Functions are responsible for sending real-time push notifications to all family members whenever new transactions, budget updates, or other important activities occur.
 
 ---
 
-## Struktur Project
+## Project Structure
 
-```
+```text
 Cashflow-Family/
-├── app/                    Source code aplikasi Android (Kotlin, Compose)
-├── functions/              Firebase Cloud Functions (TypeScript)
-├── docs/                   Screenshot dan aset dokumentasi
-├── Firestore-rules.txt     Konfigurasi Firestore Security Rules
+├── app/                    Android application source
+├── functions/              Firebase Cloud Functions
+├── docs/                   Documentation assets
+├── Firestore-rules.txt     Firestore Security Rules
 └── README.md
 ```
 
-> **Catatan:** Server push notification tambahan (`cashflow-push-server`) dikelola di repository terpisah dan tidak termasuk dalam repo ini.
+> **Note:** The additional push notification server (`cashflow-push-server`) is maintained in a separate repository and is not included in this project.
 
 ---
 
 ## Setup
 
-Beberapa file konfigurasi **tidak disertakan** dalam repository ini karena alasan keamanan. Berikut langkah setup manual yang diperlukan:
+Some configuration files are intentionally excluded from this repository for security reasons.
 
 ### 1. Firebase Configuration
 
-- Buat project baru di [Firebase Console](https://console.firebase.google.com/)
-- Aktifkan **Authentication**, **Firestore**, dan **Cloud Messaging**
-- Unduh file `google-services.json` dan letakkan di direktori `app/`
+- Create a Firebase project.
+- Enable:
+  - Firebase Authentication
+  - Cloud Firestore
+  - Firebase Cloud Messaging
+- Download `google-services.json`.
+- Place it inside:
+
+```text
+app/google-services.json
+```
 
 ### 2. Signing Configuration
 
-- Siapkan keystore signing sendiri untuk keperluan build release
-- Konfigurasikan pada `app/build.gradle.kts` atau file `keystore.properties`
+Create your own release keystore and configure it using either:
+
+```text
+app/build.gradle.kts
+```
+
+or
+
+```text
+keystore.properties
+```
 
 ### 3. Local Environment
 
-- Buat file `local.properties` di root project
-- Isi dengan path Android SDK lokal:
-  ```
-  sdk.dir=C:\\Users\\<username>\\AppData\\Local\\Android\\Sdk
-  ```
+Create:
 
-### 4. Cloud Functions (Opsional)
+```text
+local.properties
+```
 
-- Siapkan service account Firebase Admin SDK sendiri
-- **Jangan pernah** commit file kredensial (`serviceAccount.json`) ke repository
+Example:
+
+```properties
+sdk.dir=C:\\Users\\<username>\\AppData\\Local\\Android\\Sdk
+```
+
+### 4. Cloud Functions (Optional)
+
+- Configure your own Firebase Admin SDK credentials.
+- Never commit `serviceAccount.json` into the repository.
 
 ---
 
-## Tampilan Aplikasi
+## Application Screenshots
 
-<table>
-  <tr>
-    <td align="center"><b>Beranda</b></td>
-    <td align="center"><b>Riwayat</b></td>
-    <td align="center"><b>Tambah Transaksi</b></td>
-  </tr>
-  <tr>
-    <td><img src="docs/Images/Home.jpeg" width="250"/></td>
-    <td><img src="docs/Images/History.jpeg" width="250"/></td>
-    <td><img src="docs/Images/Add%20Transaction.jpeg" width="250"/></td>
-  </tr>
-  <tr>
-    <td align="center"><b>Setelan</b></td>
-    <td align="center"><b>Tentang</b></td>
-    <td></td>
-  </tr>
-  <tr>
-    <td><img src="docs/Images/Settings.jpeg" width="250"/></td>
-    <td><img src="docs/Images/About.jpeg" width="250"/></td>
-    <td></td>
-  </tr>
-</table>
+<p align="center">
+  <img src="docs/Images/Home.jpeg" width="220" alt="Home">
+  <img src="docs/Images/History.jpeg" width="220" alt="History">
+  <img src="docs/Images/Add%20Transaction.jpeg" width="220" alt="Add Transaction">
+</p>
+
+<p align="center">
+  <strong>Home</strong>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <strong>History</strong>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <strong>Add Transaction</strong>
+</p>
+
+<br>
+
+<p align="center">
+  <img src="docs/Images/Settings.jpeg" width="220" alt="Settings">
+  <img src="docs/Images/About.jpeg" width="220" alt="About">
+</p>
+
+<p align="center">
+  <strong>Settings</strong>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <strong>About</strong>
+</p>
 
 ---
 
 ## Download
 
-**Status:** Ready to download & install
+<p align="center">
 
-Aplikasi tersedia dalam bentuk APK dan dapat diinstal langsung di perangkat Android (minimal Android 8.0).
+<strong>Status</strong>
+
+Ready to download and install.
+
+</p>
+
+<p align="center">
+
+The application is distributed as an APK and supports Android 8.0 (API 26) and above.
+
+</p>
 
 <p align="center">
   <a href="https://github.com/a7x-rudolf/Cashflow-Family/releases/download/v1.0.0/Cashflow.Family.v1.0.0.apk">
-    <img src="https://img.shields.io/badge/Download%20APK-v1.0.0-2ea44f?style=for-the-badge&logo=android&logoColor=white" alt="Download APK"/>
+    <img src="https://img.shields.io/badge/Download%20APK-v1.0.0-2ea44f?style=for-the-badge&logo=android&logoColor=white" alt="Download APK">
   </a>
 </p>
 
-**Cara Install:**
+### Installation
 
-1. Unduh file APK melalui tombol di atas
-2. Buka file APK pada perangkat Android
-3. Jika diminta, aktifkan opsi **Install from Unknown Sources** di pengaturan
-4. Ikuti proses instalasi hingga selesai
-5. Login dengan akun Google dan mulai kelola keuangan keluarga
+1. Download the APK.
+2. Open the downloaded APK.
+3. Enable **Install from Unknown Sources** if prompted.
+4. Complete the installation.
+5. Sign in with your Google account.
+6. Start managing your family's finances.
 
 ---
 
-## Lisensi
+## License
 
-Repository ini dilisensikan di bawah ketentuan yang tertera pada file [LICENSE](LICENSE).
+This repository is licensed under the terms described in the [LICENSE](LICENSE) file.
 
-Kode sumber dalam repository ini dapat dilihat secara publik untuk keperluan **portofolio dan referensi**. Namun, kode **tidak diperkenankan** untuk:
+The source code is publicly available for:
 
-- Digunakan ulang dalam project komersial maupun non-komersial
-- Dimodifikasi dan didistribusikan ulang
-- Dijadikan turunan produk tanpa izin
+- Portfolio purposes
+- Learning
+- Reference
 
-Segala bentuk penggunaan di luar tujuan referensi memerlukan **izin tertulis** dari pemilik.
+The following actions are **not permitted** without prior written permission from the author:
+
+- Reusing the source code in another project.
+- Modifying and redistributing the project.
+- Creating derivative works.
+- Commercial or non-commercial redistribution.
 
 ---
 
 <p align="center">
-  Dibuat dengan dedikasi oleh <a href="https://github.com/a7x-rudolf"><b>Ridolf Widi Alfisa Lumba</b></a>
+  Developed by <strong>Ridolf Widi Alfisa Lumba</strong><br>
+  <a href="https://github.com/a7x-rudolf">GitHub Profile</a>
 </p>
