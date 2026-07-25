@@ -78,7 +78,9 @@ Aplikasi manajemen keuangan keluarga yang dirancang untuk mengelola pemasukan, p
 
 ## Unduh
 
-Aplikasi siap diunduh dan dipasang pada perangkat Android melalui halaman [GitHub Releases](https://github.com/username/repository/releases). *(Sesuaikan tautan dengan repositori Anda)*
+Aplikasi siap diunduh dan dipasang pada perangkat Android melalui tautan berikut:
+
+[Unduh APK v1.0.0](https://github.com/a7x-rudolf/Cashflow-Family/releases/download/v1.0.0/Cashflow.Family.v1.0.0.apk)
 
 ---
 
