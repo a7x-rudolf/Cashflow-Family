@@ -12,6 +12,7 @@
   <img src="https://img.shields.io/badge/Kotlin-3b82f6?style=flat-square&logo=kotlin&logoColor=white" />
   <img src="https://img.shields.io/badge/Jetpack%20Compose-3b82f6?style=flat-square&logo=jetpackcompose&logoColor=white" />
   <img src="https://img.shields.io/badge/Firebase-60a5fa?style=flat-square&logo=firebase&logoColor=white" />
+  <img src="https://img.shields.io/badge/Min%20SDK-26-60a5fa?style=flat-square&logo=android&logoColor=white" />
   <img src="https://img.shields.io/badge/License-Portfolio%20Only-94a3b8?style=flat-square" />
 </p>
 
@@ -19,6 +20,7 @@
   <a href="https://github.com/a7x-rudolf/Cashflow-Family/releases/download/v1.0.0/Cashflow.Family.v1.0.0.apk"><code>[ Unduh APK ]</code></a> &nbsp;&bull;&nbsp;
   <a href="#fitur-utama"><code>[ Fitur ]</code></a> &nbsp;&bull;&nbsp;
   <a href="#teknologi-yang-digunakan"><code>[ Teknologi ]</code></a> &nbsp;&bull;&nbsp;
+  <a href="#struktur-proyek"><code>[ Struktur ]</code></a> &nbsp;&bull;&nbsp;
   <a href="#persiapan-menjalankan-proyek"><code>[ Instalasi ]</code></a>
 </p>
 
@@ -57,8 +59,41 @@
 * **Dependency Injection:** Hilt
 * **Backend & Layanan:** Firebase Firestore, Firebase Authentication
 * **Latar Belakang & Penyimpanan:** WorkManager, DataStore Preferences
-* **Visualisasi & Media:** YCharts, Coil Async, Kotlin Coroutines
+* **Visualisasi & Media:** YCharts, Coil, Kotlin Coroutines
 * **Struktur Database (Firestore):** `users`, `families`, `transactions`, `budgets`, `recurring_transactions`
+
+---
+
+## Struktur Proyek
+
+```
+app/src/main/java/com/app/cashflowfamily/
+├── data/
+│   ├── model/          # Data class: Transaction, Budget, Family, User, dll.
+│   ├── preferences/     # DataStore preferences
+│   └── repository/      # Sumber data — komunikasi ke Firestore/Auth
+├── di/                  # Hilt module (Firebase, dsb.)
+├── ui/                   # Layar Compose, dikelompokkan per fitur
+│   ├── auth/  budget/  family/  home/  recurring/
+│   ├── analytics/  backup/  feedback/  notification/
+│   ├── settings/  onboarding/  splash/  navigation/  theme/
+│   └── components/      # Composable yang dipakai ulang
+├── utils/                # Helper — biometric, notifikasi, export, backup, update checker
+└── viewmodel/            # Satu ViewModel per fitur, menjembatani ui/ dan data/
+```
+
+Setiap fitur (transaksi, budget, keluarga, dsb.) punya pasangan `ui/` dan `viewmodel/` masing-masing, mengikuti pola MVVM secara konsisten di seluruh proyek.
+
+---
+
+## Requirements
+
+| | |
+|---|---|
+| Minimum Android | 8.0 (API 26) |
+| Android Studio | Versi terbaru (Ladybug ke atas direkomendasikan) |
+| JDK | 17 |
+| Akun Firebase | Untuk konfigurasi backend sendiri (lihat bagian instalasi) |
 
 ---
 
@@ -69,6 +104,7 @@
 1. Buat dan konfigurasikan proyek baru melalui [Firebase Console](https://console.firebase.google.com/).
 2. Unduh file konfigurasi `google-services.json` dan letakkan ke dalam direktori `app/`.
 3. Buat dan isi file `local.properties` pada root direktori proyek untuk mendefinisikan lokasi Android SDK Anda.
+4. Sync Gradle dan jalankan proyek melalui Android Studio.
 
 ---
 
