@@ -123,11 +123,18 @@ service cloud.firestore {
         && isSameFamily(request.resource.data.familyId)
         && request.resource.data.userId == request.auth.uid;
 
-      allow update: if isSameFamily(resource.data.familyId)
+      // HANYA pembuat transaksi yang boleh edit/delete transaksinya sendiri.
+      // Admin family SENGAJA tidak diberi override di sini (privasi transaksi
+      // antar member) -- ini harus konsisten dengan canEdit di
+      // TransactionDetailViewModel.kt (UI check itu cuma UX, bukan keamanan;
+      // rule inilah yang benar-benar menegakkannya di server).
+      allow update: if isOwner(resource.data.userId)
+        && isSameFamily(resource.data.familyId)
         && request.resource.data.familyId == resource.data.familyId
         && request.resource.data.userId == resource.data.userId;
 
-      allow delete: if isSameFamily(resource.data.familyId);
+      allow delete: if isOwner(resource.data.userId)
+        && isSameFamily(resource.data.familyId);
     }
 
     // ---------- budgets/{budgetId} ----------

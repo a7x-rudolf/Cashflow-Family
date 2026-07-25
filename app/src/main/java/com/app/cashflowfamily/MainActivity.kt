@@ -51,11 +51,22 @@ class MainActivity : FragmentActivity() {
         enableEdgeToEdge()
 
         splashScreen.setOnExitAnimationListener { splashScreenView ->
-            splashScreenView.iconView.animate()
-                .alpha(0f)
-                .setDuration(300)
-                .withEndAction { splashScreenView.remove() }
-                .start()
+            // Beberapa OEM (mis. sebagian device MIUI/Xiaomi) punya bug di
+            // library core-splashscreen sendiri: iconView bisa null di level
+            // native-nya sehingga getter-nya melempar NullPointerException --
+            // BUKAN sesuatu yang bisa dicegah dengan null-check biasa karena
+            // exception-nya terjadi di dalam getter library, bukan di sisi kita.
+            // Makanya dibungkus try-catch: kalau gagal, langsung remove tanpa
+            // animasi (cuma kehilangan efek kosmetik, bukan fungsi inti).
+            try {
+                splashScreenView.iconView.animate()
+                    .alpha(0f)
+                    .setDuration(300)
+                    .withEndAction { splashScreenView.remove() }
+                    .start()
+            } catch (e: Exception) {
+                splashScreenView.remove()
+            }
         }
 
         requestNotificationPermission()

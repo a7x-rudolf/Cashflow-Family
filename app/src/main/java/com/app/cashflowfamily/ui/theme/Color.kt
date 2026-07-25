@@ -17,6 +17,13 @@ val BlueSecondaryLight = Color(0xFF8ED0EA)    // Ganti ke light soft blue
 val IncomeGreen = Color(0xFF2ECC71)           // Ganti ke green lebih modern
 val ExpenseRed = Color(0xFFE53935)            // Tetap
 
+// ===== BALANCE CARD - Premium Blue Sky Gradient =====
+// Dipakai khusus untuk background card saldo bulan ini di Beranda.
+// Turunan dari palet ice-blue yang sudah ada (bukan warna baru di luar brand).
+val BalanceCardGradientStart = Color(0xFF1E4E8C)  // Deep sky blue (anchor gelap)
+val BalanceCardGradientMid = Color(0xFF4A90D9)    // = GreenPrimary
+val BalanceCardGradientEnd = Color(0xFF8ED0EA)    // = BlueSecondaryLight (terang, kesan langit)
+
 // ===== NEUTRAL =====
 val BackgroundLight = Color(0xFFF0F4FA)       // Ganti ke soft icy background
 val SurfaceLight = Color(0xFFFFFFFF)          // Tetap

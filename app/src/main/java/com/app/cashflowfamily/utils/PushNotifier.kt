@@ -37,24 +37,39 @@ object PushNotifier {
      * Kirim permintaan push ke server. Fire-and-forget (async), gagal
      * kirim push TIDAK BOLEH menggagalkan alur utama app (menyimpan
      * transaksi/notifikasi in-app harus tetap sukses walau push gagal).
+     *
+     * @param recipients map userId -> notificationId milik in-app notification
+     *   DOKUMEN USER ITU SENDIRI (bukan notificationId milik user lain!).
+     *   Setiap user di Firestore punya dokumen notifikasi terpisah (lihat
+     *   NotificationRepository.addNotifications -> batch.set per user),
+     *   jadi notificationId yang dikirim ke tiap device HARUS punya milik
+     *   dia sendiri, supaya tap notifikasi push membuka/mark-as-read
+     *   dokumen yang benar.
      */
     fun notify(
-        recipientUserIds: List<String>,
+        recipients: Map<String, String>,
         actorUserId: String,
         type: String,
         title: String,
-        message: String,
-        notificationId: String
+        message: String
     ) {
-        if (recipientUserIds.isEmpty()) return
+        if (recipients.isEmpty()) return
+
+        val payload = JSONArray(
+            recipients.map { (userId, notificationId) ->
+                JSONObject().apply {
+                    put("userId", userId)
+                    put("notificationId", notificationId)
+                }
+            }
+        )
 
         val body = JSONObject().apply {
-            put("recipientUserIds", JSONArray(recipientUserIds))
+            put("recipients", payload)
             put("actorUserId", actorUserId)
             put("type", type)
             put("title", title)
             put("message", message)
-            put("notificationId", notificationId)
         }.toString()
 
         val request = Request.Builder()

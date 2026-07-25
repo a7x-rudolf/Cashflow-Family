@@ -152,18 +152,21 @@ class AddTransactionViewModel @Inject constructor(
                         Log.d("AddTransactionVM", "Broadcast notifications sent to ${savedNotifications.size} members")
 
                         // ===== 3. PUSH NOTIFICATION (FCM lewat push-server) =====
-                        // Kirim ke semua member KECUALI diri sendiri.
-                        val recipientIds = family.members.filter { it != user.userId }
+                        // Kirim ke semua member KECUALI diri sendiri, masing-masing
+                        // dengan notificationId dokumennya sendiri (bukan dokumen
+                        // member lain -- setiap user punya dokumen notifikasi
+                        // terpisah di Firestore).
+                        val recipients = savedNotifications
+                            .filter { it.userId != user.userId }
+                            .associate { it.userId to it.notificationId }
 
-                        if (recipientIds.isNotEmpty()) {
+                        if (recipients.isNotEmpty()) {
                             PushNotifier.notify(
-                                recipientUserIds = recipientIds,
+                                recipients = recipients,
                                 actorUserId = user.userId,
                                 type = "family_activity",
                                 title = title,
-                                message = message,
-                                notificationId = savedNotifications.firstOrNull { it.userId != user.userId }
-                                    ?.notificationId.orEmpty()
+                                message = message
                             )
                         }
                     }

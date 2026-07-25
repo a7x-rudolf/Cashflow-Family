@@ -33,22 +33,29 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.app.cashflowfamily.utils.CurrencyFormatter
 import com.app.cashflowfamily.viewmodel.InsightType
 
 /**
- * Card ringkas untuk halaman Beranda: menampilkan tren saldo beberapa bulan
- * terakhir dalam bentuk wave chart mini + satu insight utama.
+ * Card ringkas untuk halaman Beranda: menampilkan tren pemasukan vs
+ * pengeluaran harian pada bulan yang sedang aktif di card saldo (2 garis,
+ * gaya wave/heartbeat) + satu insight utama.
  * Sengaja dibuat compact (bukan versi lengkap seperti di halaman Analytics).
+ * Otomatis mengikuti bulan yang dipilih di BalanceCardPager -- caller cukup
+ * mengoper data harian bulan yang sedang aktif.
  */
 @Composable
 fun HomeInsightWaveCard(
-    trendValues: List<Double>,
+    dailyIncome: List<Double>,
+    dailyExpense: List<Double>,
     insightTitle: String,
     insightDescription: String,
     insightType: InsightType,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val incomeColor = Color(0xFF81C784)   // konsisten dengan ikon "Pemasukan" di BalanceCard
+    val expenseColor = Color(0xFFE57373)  // konsisten dengan ikon "Pengeluaran" di BalanceCard
     val (icon, accentColor) = when (insightType) {
         InsightType.POSITIVE -> Icons.Filled.CheckCircle to Color(0xFF2ECC71)
         InsightType.NEGATIVE -> Icons.AutoMirrored.Filled.TrendingDown to Color(0xFFE53935)
@@ -102,12 +109,27 @@ fun HomeInsightWaveCard(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Wave chart mini (tren saldo)
-            MiniWaveChart(
-                values = trendValues,
-                lineColor = MaterialTheme.colorScheme.primary,
-                height = 56.dp
-            )
+            // Wave chart mini dual-line (pemasukan vs pengeluaran, harian)
+            val hasEnoughData = dailyIncome.size >= 2 && dailyExpense.size == dailyIncome.size
+            if (hasEnoughData) {
+                DualMiniWaveChart(
+                    valuesA = dailyIncome,
+                    valuesB = dailyExpense,
+                    colorA = incomeColor,
+                    colorB = expenseColor,
+                    height = 64.dp,
+                    endLabel = CurrencyFormatter.formatNumber(dailyIncome.last())
+                )
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                // Legend
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    LegendDot(color = incomeColor, label = "Pemasukan")
+                    Spacer(modifier = Modifier.width(14.dp))
+                    LegendDot(color = expenseColor, label = "Pengeluaran")
+                }
+            }
 
             Spacer(modifier = Modifier.height(10.dp))
 
@@ -147,5 +169,23 @@ fun HomeInsightWaveCard(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun LegendDot(color: Color, label: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(
+            modifier = Modifier
+                .size(8.dp)
+                .clip(CircleShape)
+                .background(color)
+        )
+        Spacer(modifier = Modifier.width(6.dp))
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f)
+        )
     }
 }

@@ -64,11 +64,9 @@ import com.app.cashflowfamily.ui.components.TransactionItem
 import com.app.cashflowfamily.ui.components.UserAvatar
 import com.app.cashflowfamily.ui.navigation.Screen
 import com.app.cashflowfamily.utils.DateFormatter
+import com.app.cashflowfamily.utils.HomeInsightHelper
 import com.app.cashflowfamily.viewmodel.HomeViewModel
-import com.app.cashflowfamily.viewmodel.InsightType
-import com.app.cashflowfamily.viewmodel.MonthData
 import com.app.cashflowfamily.viewmodel.NotificationViewModel
-import kotlin.math.abs
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -308,44 +306,62 @@ fun HomeScreen(
                     CircularProgressIndicator()
                 }
             } else {
-                Column(modifier = Modifier.fillMaxSize()) {
+                val currentTransactions = currentMonthData?.transactions ?: emptyList()
 
-                    // ===== FIXED AREA =====
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 16.dp)
-                    ) {
+                // ===== SATU LazyColumn UNTUK SELURUH HALAMAN =====
+                // Card saldo + header "Transaksi" dijadikan item di dalam list
+                // yang sama (bukan Column terpisah dengan tinggi fixed) supaya:
+                //  1. Konsisten di semua ukuran/densitas layar -- proporsi
+                //     ruang untuk saldo vs daftar transaksi tidak lagi
+                //     hardcoded, semuanya ikut scroll bersamaan.
+                //  2. Di layar pendek, list transaksi tidak lagi "kepotong"
+                //     cuma nyisa 1-2 item karena harus berbagi ruang dengan
+                //     area fixed di atasnya -- sekarang user tinggal scroll.
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    item {
+                        Spacer(modifier = Modifier.height(16.dp))
                         BalanceCardPager(
                             monthDataList = uiState.monthDataList,
                             onPageChanged = { newPage ->
                                 selectedPageIndex = newPage
                             }
                         )
+                    }
 
-                        // ===== INSIGHT ANALYTICS RINGKAS (wave chart) =====
-                        if (uiState.monthDataList.isNotEmpty()) {
+                    // Card insight (wave chart pemasukan vs pengeluaran) --
+                    // otomatis mengikuti bulan yang sedang aktif di atas,
+                    // karena dihitung dari currentMonthData yang sama.
+                    currentMonthData?.let { monthData ->
+                        item {
                             Spacer(modifier = Modifier.height(16.dp))
 
-                            val (insightTitle, insightDescription, insightType) =
-                                remember(uiState.monthDataList) {
-                                    buildHomeInsight(uiState.monthDataList)
-                                }
-                            val trendValues = remember(uiState.monthDataList) {
-                                uiState.monthDataList.takeLast(6).map { it.balance }
+                            val (dailyIncome, dailyExpense) = remember(monthData) {
+                                HomeInsightHelper.dailyIncomeExpenseSeries(monthData)
+                            }
+                            val insight = remember(monthData) {
+                                HomeInsightHelper.primaryInsight(monthData)
                             }
 
                             HomeInsightWaveCard(
-                                trendValues = trendValues,
-                                insightTitle = insightTitle,
-                                insightDescription = insightDescription,
-                                insightType = insightType,
-                                onClick = { rootNavController.navigate(Screen.Analytics.route) }
+                                dailyIncome = dailyIncome,
+                                dailyExpense = dailyExpense,
+                                insightTitle = insight.title,
+                                insightDescription = insight.description,
+                                insightType = insight.type,
+                                onClick = {
+                                    rootNavController.navigate(Screen.Analytics.route)
+                                }
                             )
                         }
+                    }
 
+                    item {
                         Spacer(modifier = Modifier.height(16.dp))
-
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -361,14 +377,19 @@ fun HomeScreen(
 
                                 currentMonthData?.let {
                                     Text(
-                                        text = DateFormatter.formatMonthYear(it.monthTimestamp),
+                                        text = buildString {
+                                            append(DateFormatter.formatMonthYear(it.monthTimestamp))
+                                            if (currentTransactions.isNotEmpty()) {
+                                                append(" · ${currentTransactions.size} transaksi")
+                                            }
+                                        },
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
                                     )
                                 }
                             }
 
-                            if (currentMonthData?.transactions?.isNotEmpty() == true) {
+                            if (currentTransactions.isNotEmpty()) {
                                 TextButton(
                                     onClick = {
                                         bottomNavController.navigate(Screen.History.route) {
@@ -384,118 +405,48 @@ fun HomeScreen(
                                 }
                             }
                         }
+                        Spacer(modifier = Modifier.height(4.dp))
                     }
 
-                    // ===== SCROLLABLE AREA =====
-                    val currentTransactions = currentMonthData?.transactions ?: emptyList()
-
                     if (currentTransactions.isEmpty()) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            EmptyState(
-                                title = "Belum Ada Transaksi",
-                                description = currentMonthData?.let {
-                                    "Tidak ada transaksi di ${DateFormatter.formatMonthYear(it.monthTimestamp)}"
-                                } ?: "Klik tombol + untuk menambah transaksi",
-                                icon = Icons.Filled.Receipt
-                            )
-                        }
-                    } else {
-                        LazyColumn(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(horizontal = 16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            items(
-                                items = currentTransactions,
-                                key = { it.transactionId }
-                            ) { transaction ->
-                                TransactionItem(
-                                    transaction = transaction,
-                                    onClick = {
-                                        rootNavController.navigate(
-                                            Screen.TransactionDetail.createRoute(transaction.transactionId)
-                                        )
-                                    }
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(240.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                EmptyState(
+                                    title = "Belum Ada Transaksi",
+                                    description = currentMonthData?.let {
+                                        "Tidak ada transaksi di ${DateFormatter.formatMonthYear(it.monthTimestamp)}"
+                                    } ?: "Klik tombol + untuk menambah transaksi",
+                                    icon = Icons.Filled.Receipt
                                 )
                             }
-
-                            item {
-                                // Sedikit ruang di bawah list (FAB sudah dipindahkan ke bottom navbar)
-                                Spacer(modifier = Modifier.height(24.dp))
-                            }
                         }
+                    } else {
+                        items(
+                            items = currentTransactions,
+                            key = { it.transactionId }
+                        ) { transaction ->
+                            TransactionItem(
+                                transaction = transaction,
+                                onClick = {
+                                    rootNavController.navigate(
+                                        Screen.TransactionDetail.createRoute(transaction.transactionId)
+                                    )
+                                }
+                            )
+                        }
+                    }
+
+                    item {
+                        // Sedikit ruang di bawah list (FAB sudah dipindahkan ke bottom navbar)
+                        Spacer(modifier = Modifier.height(24.dp))
                     }
                 }
             }
         }
-    }
-}
-
-/**
- * Menentukan satu insight utama untuk ditampilkan di Beranda, berdasarkan
- * data bulan berjalan dan perbandingan dengan bulan sebelumnya.
- * Versi ringkas dari logika insight yang ada di halaman Analytics.
- */
-private fun buildHomeInsight(monthDataList: List<MonthData>): Triple<String, String, InsightType> {
-    val current = monthDataList.lastOrNull()
-        ?: return Triple(
-            "Belum Ada Data",
-            "Mulai catat transaksi untuk melihat insight.",
-            InsightType.INFO
-        )
-
-    if (current.transactions.isEmpty()) {
-        return Triple(
-            "Belum Ada Transaksi",
-            "Belum ada transaksi tercatat bulan ini.",
-            InsightType.INFO
-        )
-    }
-
-    // Bandingkan pengeluaran dengan bulan lalu
-    val previous = monthDataList.getOrNull(monthDataList.size - 2)
-    if (previous != null && previous.expense > 0) {
-        val diff = current.expense - previous.expense
-        val percent = ((diff / previous.expense) * 100).toInt()
-
-        if (percent > 20) {
-            return Triple(
-                "Pengeluaran Meningkat",
-                "Naik $percent% dibanding bulan lalu.",
-                InsightType.WARNING
-            )
-        } else if (percent < -20) {
-            return Triple(
-                "Hemat Bulan Ini",
-                "Pengeluaran turun ${abs(percent)}% dibanding bulan lalu.",
-                InsightType.POSITIVE
-            )
-        }
-    }
-
-    // Fallback: status kesehatan saldo bulan ini
-    return when {
-        current.balance > 0 && current.income > 0 -> {
-            val ratio = (current.balance / current.income * 100).toInt()
-            Triple(
-                "Keuangan Sehat",
-                "Anda menyisihkan $ratio% dari pemasukan bulan ini.",
-                InsightType.POSITIVE
-            )
-        }
-        current.balance < 0 -> Triple(
-            "Pengeluaran Melebihi Pemasukan",
-            "Perlu evaluasi budget bulan ini.",
-            InsightType.WARNING
-        )
-        else -> Triple(
-            "Keseimbangan",
-            "Pemasukan dan pengeluaran seimbang bulan ini.",
-            InsightType.INFO
-        )
     }
 }

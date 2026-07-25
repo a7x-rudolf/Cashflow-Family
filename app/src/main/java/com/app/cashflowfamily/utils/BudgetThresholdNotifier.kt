@@ -153,13 +153,15 @@ class BudgetThresholdNotifier @Inject constructor(
                 // ===== PUSH NOTIFICATION (FCM lewat push-server) =====
                 // Untuk budget, semua member relevan termasuk pembuat transaksi
                 // (dia yang bikin transaksi tapi belum tentu lagi lihat layar HP-nya).
+                // Setiap penerima dapat notificationId dokumennya sendiri.
+                val recipients = savedNotifications.associate { it.userId to it.notificationId }
+
                 PushNotifier.notify(
-                    recipientUserIds = family.members,
+                    recipients = recipients,
                     actorUserId = "",
                     type = if (isOver) "budget_over" else "budget_warning",
                     title = title,
-                    message = message,
-                    notificationId = savedNotifications.firstOrNull()?.notificationId.orEmpty()
+                    message = message
                 )
             }
             .onFailure { error ->

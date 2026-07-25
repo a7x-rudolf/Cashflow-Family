@@ -40,6 +40,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.app.cashflowfamily.utils.AppLinks.INVITE_APK_DOWNLOAD_URL
 import com.app.cashflowfamily.ui.navigation.Screen
 
 @Composable
@@ -204,17 +205,23 @@ private fun copyToClipboard(context: Context, text: String) {
 // Helper: Share via intent (WhatsApp, dll)
 private fun shareFamilyCode(context: Context, familyName: String, code: String) {
     val message = """
-        Halo! Saya mengundang Anda bergabung dengan keluarga "$familyName" di aplikasi Cashflow Family.
-        
-        Kode Undangan: $code
-        
-        Cara bergabung:
-        1. Download aplikasi Cashflow Family
-        2. Daftar akun baru
-        3. Pilih "Gabung Keluarga"
-        4. Masukkan kode di atas
-        
-        Yuk kelola keuangan keluarga bersama!
+        🟢 *Undangan Keluarga — Cashflow Family*
+
+        Halo! Anda diundang bergabung dengan keluarga *"$familyName"* di aplikasi *Cashflow Family*, untuk mengelola keuangan keluarga bersama secara rapi dan transparan.
+
+        🔑 *Kode Undangan Anda:*
+        *$code*
+
+        👉 *Unduh Aplikasinya di Sini:*
+        $INVITE_APK_DOWNLOAD_URL
+
+        📋 *Langkah Bergabung:*
+        1️⃣ Unduh & pasang aplikasinya lewat tautan di atas
+        2️⃣ Daftar akun baru (atau login bila sudah punya)
+        3️⃣ Pilih menu "Gabung Keluarga"
+        4️⃣ Masukkan kode undangan di atas
+
+        Ditunggu ya — yuk mulai atur keuangan keluarga bersama! 🙌
     """.trimIndent()
 
     val shareIntent = Intent(Intent.ACTION_SEND).apply {

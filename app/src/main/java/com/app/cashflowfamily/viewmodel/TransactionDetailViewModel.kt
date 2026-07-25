@@ -60,10 +60,13 @@ class TransactionDetailViewModel @Inject constructor(
                     transactionRepository.getTransactionById(transactionId)
                         .onSuccess { transaction ->
                             // Cek permission:
-                            // - User yang membuat transaksi bisa edit/delete
-                            // - Admin keluarga juga bisa edit/delete semua transaksi
-                            val canEdit = user.userId == transaction.userId ||
-                                    user.role == "admin"
+                            // - HANYA user yang membuat transaksi yang boleh edit/delete.
+                            //   Admin family SENGAJA tidak diberi hak override di sini
+                            //   (privasi transaksi antar member). Kalau nanti admin
+                            //   memang butuh hak override, tambahkan lagi secara
+                            //   eksplisit DAN update juga Firestore rules
+                            //   match /transactions/{transactionId} biar konsisten.
+                            val canEdit = user.userId == transaction.userId
 
                             _uiState.value = _uiState.value.copy(
                                 isLoading = false,
