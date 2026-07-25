@@ -9,10 +9,17 @@
 </p>
 
 <p align="center">
+  <img src="https://img.shields.io/badge/Kotlin-3b82f6?style=flat-square&logo=kotlin&logoColor=white" />
+  <img src="https://img.shields.io/badge/Jetpack%20Compose-3b82f6?style=flat-square&logo=jetpackcompose&logoColor=white" />
+  <img src="https://img.shields.io/badge/Firebase-60a5fa?style=flat-square&logo=firebase&logoColor=white" />
+  <img src="https://img.shields.io/badge/License-Portfolio%20Only-94a3b8?style=flat-square" />
+</p>
+
+<p align="center">
   <a href="https://github.com/a7x-rudolf/Cashflow-Family/releases/download/v1.0.0/Cashflow.Family.v1.0.0.apk"><code>[ Unduh APK ]</code></a> &nbsp;&bull;&nbsp;
-  <a href="#-fitur-utama"><code>[ Fitur ]</code></a> &nbsp;&bull;&nbsp;
-  <a href="#-teknologi-yang-digunakan"><code>[ Teknologi ]</code></a> &nbsp;&bull;&nbsp;
-  <a href="#-persiapan-menjalankan-proyek"><code>[ Instalasi ]</code></a>
+  <a href="#fitur-utama"><code>[ Fitur ]</code></a> &nbsp;&bull;&nbsp;
+  <a href="#teknologi-yang-digunakan"><code>[ Teknologi ]</code></a> &nbsp;&bull;&nbsp;
+  <a href="#persiapan-menjalankan-proyek"><code>[ Instalasi ]</code></a>
 </p>
 
 </div>
