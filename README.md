@@ -1,57 +1,134 @@
 # Cashflow Family — Android
 
-> 📱 Ini adalah versi **Android** dari aplikasi Cashflow Family — aplikasi manajemen keuangan keluarga.
+Versi Android dari aplikasi manajemen keuangan keluarga. Membantu keluarga mengelola pemasukan, pengeluaran, dan anggaran bulanan secara kolaboratif.
 
-Cashflow Family membantu keluarga mengelola pemasukan, pengeluaran, dan budget bulanan bersama-sama dalam satu aplikasi.
+---
 
 ## Fitur
 
-- 💰 Catat transaksi (pemasukan & pengeluaran) dengan kategori
-- 👨‍👩‍👧 Kelola keluarga — undang anggota lewat kode undangan
-- 📊 Budget bulanan per kategori
-- 🔁 Transaksi berulang (recurring) untuk gaji, tagihan, langganan
-- 🔔 Notifikasi pengingat harian & peringatan budget
-- 🔐 Login dengan fingerprint/biometric
-- 📈 Analitik & laporan pengeluaran keluarga
+- Pencatatan transaksi pemasukan dan pengeluaran dengan kategori
+- Manajemen keluarga dengan undangan anggota melalui kode
+- Anggaran bulanan per kategori
+- Transaksi berulang untuk gaji, tagihan, dan langganan
+- Notifikasi pengingat harian dan peringatan anggaran
+- Login dengan fingerprint atau biometric
+- Analitik dan laporan pengeluaran keluarga
 
-## Tech Stack
+---
 
-- **Kotlin** + **Jetpack Compose**
-- **Hilt** untuk dependency injection
-- **Firebase / Firestore** sebagai backend (users, families, transactions, budgets, recurring_transactions)
-- **MVVM** architecture
+## Teknologi
 
-## Setup
+- Kotlin dengan Jetpack Compose
+- Hilt untuk dependency injection
+- Firebase Firestore sebagai backend
+- Arsitektur MVVM
 
-Project ini membutuhkan file konfigurasi Firebase (`app/google-services.json`) dan keystore signing yang **tidak** disertakan di repo ini karena alasan keamanan. Untuk menjalankan project:
+---
 
-1. Buat project Firebase sendiri di [Firebase Console](https://console.firebase.google.com/)
-2. Download `google-services.json` dan taruh di folder `app/`
-3. Isi `local.properties` dengan lokasi Android SDK kamu
+## Persiapan Menjalankan Proyek
+
+File konfigurasi Firebase dan keystore signing tidak disertakan dalam repositori ini.
+
+1. Buat proyek Firebase di Firebase Console
+2. Unduh `google-services.json` dan letakkan di folder `app/`
+3. Isi `local.properties` dengan lokasi Android SDK
+
+---
 
 ## Tampilan Aplikasi
 
 | Beranda | Riwayat Transaksi | Tambah Transaksi |
-|---|---|---|
-| ![Beranda](docs/screenshots/beranda.jpeg) | ![Riwayat](docs/screenshots/riwayat.jpeg) | ![Tambah Transaksi](docs/screenshots/tambah-transaksi.jpeg) |
+|---------|-------------------|------------------|
+| ![](docs/screenshots/beranda.jpeg) | ![](docs/screenshots/riwayat.jpeg) | ![](docs/screenshots/tambah-transaksi.jpeg) |
 
-| Budget Bulanan | Transaksi Berulang | Keluarga |
-|---|---|---|
-| ![Budget](docs/screenshots/budget.jpeg) | ![Recurring](docs/screenshots/recurring.jpeg) | ![Keluarga](docs/screenshots/keluarga.jpeg) |
+| Anggaran Bulanan | Transaksi Berulang | Keluarga |
+|------------------|-------------------|----------|
+| ![](docs/screenshots/budget.jpeg) | ![](docs/screenshots/recurring.jpeg) | ![](docs/screenshots/keluarga.jpeg) |
 
-| Setelan | Promo |
-|---|---|
-| ![Setelan](docs/screenshots/setelan.jpeg) | ![Promo](docs/screenshots/promo.jpeg) |
+| Pengaturan | Promo |
+|------------|-------|
+| ![](docs/screenshots/setelan.jpeg) | ![](docs/screenshots/promo.jpeg) |
 
-## Status
+---
 
-Ready to Download & install
+## Unduh
 
-[📥(https://github.com/a7x-rudolf/Cashflow-Family/releases/latest)](https://github.com/a7x-rudolf/Cashflow-Family/releases/download/v1.0.0/Cashflow.Family.apk)
+Aplikasi siap diunduh dan dipasang.
 
-## License
+[Download Cashflow Family APK](https://github.com/a7x-rudolf/Cashflow-Family/releases/download/v1.0.0/Cashflow.Family.apk)
 
-Lihat file [LICENSE](LICENSE). Kode ini bisa dilihat siapa saja untuk keperluan portofolio/referensi, tapi **tidak boleh dipakai ulang, dimodifikasi, atau didistribusikan** tanpa izin tertulis dari pemilik.
+---
+
+## Lisensi
+
+Kode ini tersedia untuk tujuan portofolio dan referensi. Penggunaan ulang, modifikasi, atau distribusi tanpa izin tertulis dari pemilik tidak diperbolehkan.
+
+---
+
+Dibuat oleh [Ridolf Widi Alfisa Lumba](https://github.com/a7x-rudolf)# Cashflow Family — Android
+
+Versi Android dari aplikasi manajemen keuangan keluarga. Membantu keluarga mengelola pemasukan, pengeluaran, dan anggaran bulanan secara kolaboratif.
+
+---
+
+## Fitur
+
+- Pencatatan transaksi pemasukan dan pengeluaran dengan kategori
+- Manajemen keluarga dengan undangan anggota melalui kode
+- Anggaran bulanan per kategori
+- Transaksi berulang untuk gaji, tagihan, dan langganan
+- Notifikasi pengingat harian dan peringatan anggaran
+- Login dengan fingerprint atau biometric
+- Analitik dan laporan pengeluaran keluarga
+
+---
+
+## Teknologi
+
+- Kotlin dengan Jetpack Compose
+- Hilt untuk dependency injection
+- Firebase Firestore sebagai backend
+- Arsitektur MVVM
+
+---
+
+## Persiapan Menjalankan Proyek
+
+File konfigurasi Firebase dan keystore signing tidak disertakan dalam repositori ini.
+
+1. Buat proyek Firebase di Firebase Console
+2. Unduh `google-services.json` dan letakkan di folder `app/`
+3. Isi `local.properties` dengan lokasi Android SDK
+
+---
+
+## Tampilan Aplikasi
+
+| Beranda | Riwayat Transaksi | Tambah Transaksi |
+|---------|-------------------|------------------|
+| ![](docs/screenshots/beranda.jpeg) | ![](docs/screenshots/riwayat.jpeg) | ![](docs/screenshots/tambah-transaksi.jpeg) |
+
+| Anggaran Bulanan | Transaksi Berulang | Keluarga |
+|------------------|-------------------|----------|
+| ![](docs/screenshots/budget.jpeg) | ![](docs/screenshots/recurring.jpeg) | ![](docs/screenshots/keluarga.jpeg) |
+
+| Pengaturan | Promo |
+|------------|-------|
+| ![](docs/screenshots/setelan.jpeg) | ![](docs/screenshots/promo.jpeg) |
+
+---
+
+## Unduh
+
+Aplikasi siap diunduh dan dipasang.
+
+[Download Cashflow Family APK](https://github.com/a7x-rudolf/Cashflow-Family/releases/download/v1.0.0/Cashflow.Family.apk)
+
+---
+
+## Lisensi
+
+Kode ini tersedia untuk tujuan portofolio dan referensi. Penggunaan ulang, modifikasi, atau distribusi tanpa izin tertulis dari pemilik tidak diperbolehkan.
 
 ---
 
