@@ -1,68 +1,94 @@
-# Cashflow Family — Android
+<div align="center">
 
-Versi Android dari aplikasi manajemen keuangan keluarga. Membantu keluarga mengelola pemasukan, pengeluaran, dan anggaran bulanan secara kolaboratif.
+# 💰 Cashflow Family — Android
 
----
+**Aplikasi manajemen keuangan keluarga.**
+Kelola pemasukan, pengeluaran, dan anggaran bulanan secara kolaboratif — bersama seluruh anggota keluarga.
 
-## Fitur
+[![Kotlin](https://img.shields.io/badge/Kotlin-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)](https://kotlinlang.org)
+[![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose)
+[![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com)
+[![License](https://img.shields.io/badge/License-Portfolio%20Only-lightgrey?style=for-the-badge)](#-lisensi)
 
-- Pencatatan transaksi pemasukan dan pengeluaran dengan kategori
-- Manajemen keluarga dengan undangan anggota melalui kode
-- Anggaran bulanan per kategori
-- Transaksi berulang untuk gaji, tagihan, dan langganan
-- Notifikasi pengingat harian dan peringatan anggaran
-- Login dengan fingerprint atau biometric
-- Analitik dan laporan pengeluaran keluarga
+[Unduh APK](#-unduh) · [Fitur](#-fitur) · [Teknologi](#-teknologi) · [Instalasi](#-persiapan-menjalankan-proyek)
 
----
+</div>
 
-## Teknologi
+<br>
 
-- Kotlin dengan Jetpack Compose
-- Hilt untuk dependency injection
-- Firebase Firestore sebagai backend
-- Arsitektur MVVM
+## ✨ Fitur
 
----
+| | |
+|---|---|
+| 💸 | Pencatatan transaksi pemasukan & pengeluaran dengan kategori |
+| 👨‍👩‍👧‍👦 | Manajemen keluarga dengan undangan anggota melalui kode |
+| 📊 | Anggaran bulanan per kategori |
+| 🔁 | Transaksi berulang untuk gaji, tagihan, dan langganan |
+| 🔔 | Notifikasi pengingat harian dan peringatan anggaran |
+| 🔒 | Login dengan fingerprint / biometric |
+| 📈 | Analitik dan laporan pengeluaran keluarga |
 
-## Persiapan Menjalankan Proyek
+<br>
 
-File konfigurasi Firebase dan keystore signing tidak disertakan dalam repositori ini.
+## 🛠 Teknologi
 
-1. Buat proyek Firebase di Firebase Console
+- **Kotlin** dengan **Jetpack Compose**
+- **Hilt** — dependency injection
+- **Firebase Firestore** — backend
+- Arsitektur **MVVM**
+
+<br>
+
+## 🚀 Persiapan Menjalankan Proyek
+
+> File konfigurasi Firebase dan keystore signing **tidak disertakan** dalam repositori ini.
+
+1. Buat proyek Firebase di [Firebase Console](https://console.firebase.google.com)
 2. Unduh `google-services.json` dan letakkan di folder `app/`
 3. Isi `local.properties` dengan lokasi Android SDK
 
----
+<br>
 
-## Tampilan Aplikasi
+## 📱 Tampilan Aplikasi
+
+<div align="center">
 
 | Beranda | Riwayat Transaksi | Tambah Transaksi |
-|---------|-------------------|------------------|
-| ![](docs/screenshots/beranda.jpeg) | ![](docs/screenshots/riwayat.jpeg) | ![](docs/screenshots/tambah-transaksi.jpeg) |
+|:---:|:---:|:---:|
+| <img src="docs/Screenshoot%20App/Beranda.jpeg" width="220"> | <img src="docs/Screenshoot%20App/Riwayat.jpeg" width="220"> | <img src="docs/Screenshoot%20App/Tambah-Transkasi.jpeg" width="220"> |
 
-| Anggaran Bulanan | Transaksi Berulang | Keluarga |
-|------------------|-------------------|----------|
-| ![](docs/screenshots/budget.jpeg) | ![](docs/screenshots/recurring.jpeg) | ![](docs/screenshots/keluarga.jpeg) |
+| Login Biometric | Notifikasi | Feedback |
+|:---:|:---:|:---:|
+| <img src="docs/Screenshoot%20App/Biometric.jpeg" width="220"> | <img src="docs/Screenshoot%20App/Notifikasi.jpeg" width="220"> | <img src="docs/Screenshoot%20App/Feedback.jpeg" width="220"> |
 
-| Pengaturan | Promo |
-|------------|-------|
-| ![](docs/screenshots/setelan.jpeg) | ![](docs/screenshots/promo.jpeg) |
+| Pengaturan | Tentang |
+|:---:|:---:|
+| <img src="docs/Screenshoot%20App/Setelan.jpeg" width="220"> | <img src="docs/Screenshoot%20App/Tentang.jpeg" width="220"> |
 
----
+</div>
 
-## Unduh
+<br>
+
+## 📥 Unduh
 
 Aplikasi siap diunduh dan dipasang.
 
-[Download Cashflow Family APK](https://github.com/a7x-rudolf/Cashflow-Family/releases/download/v1.0.0/Cashflow.Family.apk)
+<div align="center">
 
----
+[![Download APK](https://img.shields.io/badge/Download-Cashflow%20Family%20APK-2ea44f?style=for-the-badge&logo=android&logoColor=white)](https://github.com/a7x-rudolf/Cashflow-Family/releases/download/v1.0.0/Cashflow.Family.apk)
 
-## Lisensi
+</div>
 
-Kode ini tersedia untuk tujuan portofolio dan referensi. Penggunaan ulang, modifikasi, atau distribusi tanpa izin tertulis dari pemilik tidak diperbolehkan.
+<br>
 
----
+## 📄 Lisensi
 
-Dibuat oleh [Ridolf Widi Alfisa Lumba](https://github.com/a7x-rudolf)
+Kode ini tersedia untuk tujuan **portofolio dan referensi**. Penggunaan ulang, modifikasi, atau distribusi tanpa izin tertulis dari pemilik tidak diperbolehkan.
+
+<br>
+
+<div align="center">
+
+Dibuat oleh **[Ridolf Widi Alfisa Lumba](https://github.com/a7x-rudolf)**
+
+</div>
