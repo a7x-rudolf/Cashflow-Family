@@ -61,7 +61,7 @@ Project ini butuh file konfigurasi yang **tidak** disertakan di repo ini karena 
 
 Ready to download & install
 
-[📥 Download APK](https://github.com/a7x-rudolf/Cashflow-Family/releases/download/v1.0.0/Cashflow.Family.apk)
+[📥 Download APK](https://github.com/a7x-rudolf/Cashflow-Family/releases/download/v1.0.0/Cashflow.Family.v1.0.0.apk)
 
 ## License
 
