@@ -1,4 +1,4 @@
-# Cashflow Family
+<h1 align="center">Cashflow Family</h1>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Platform-Android-3DDC84?logo=android&logoColor=white" alt="Android">
@@ -53,7 +53,7 @@
 
 - Firebase Cloud Messaging push notifications
 - Notifications received even when the application is closed
-- Google Sign-In
+- Google Sign-In authentication
 - Biometric authentication
 - Automatic application update checking
 
@@ -64,7 +64,7 @@
 ### Android Application
 
 | Category | Technology |
-|----------|------------|
+|---|---|
 | Language | Kotlin |
 | UI Framework | Jetpack Compose (Material 3) |
 | Architecture | MVVM |
@@ -79,7 +79,7 @@
 ### Backend
 
 | Category | Technology |
-|----------|------------|
+|---|---|
 | Cloud Functions | TypeScript |
 | Push Notification Service | Firebase Admin SDK |
 | Security | Firestore Security Rules |
@@ -110,7 +110,7 @@ Some configuration files are intentionally excluded from this repository for sec
 ### 1. Firebase Configuration
 
 - Create a Firebase project.
-- Enable:
+- Enable the following services:
   - Firebase Authentication
   - Cloud Firestore
   - Firebase Cloud Messaging
@@ -137,13 +137,7 @@ keystore.properties
 
 ### 3. Local Environment
 
-Create:
-
-```text
-local.properties
-```
-
-Example:
+Create a `local.properties` file:
 
 ```properties
 sdk.dir=C:\\Users\\<username>\\AppData\\Local\\Android\\Sdk
@@ -158,50 +152,21 @@ sdk.dir=C:\\Users\\<username>\\AppData\\Local\\Android\\Sdk
 
 ## Application Screenshots
 
-<p align="center">
-  <img src="docs/Images/Home.jpeg" width="220" alt="Home">
-  <img src="docs/Images/History.jpeg" width="220" alt="History">
-  <img src="docs/Images/Add%20Transaction.jpeg" width="220" alt="Add Transaction">
-</p>
+| Home | History | Add Transaction |
+|:---:|:---:|:---:|
+| <img src="docs/Images/Home.jpeg" width="220" alt="Home"> | <img src="docs/Images/History.jpeg" width="220" alt="History"> | <img src="docs/Images/Add%20Transaction.jpeg" width="220" alt="Add Transaction"> |
 
-<p align="center">
-  <strong>Home</strong>
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  <strong>History</strong>
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  <strong>Add Transaction</strong>
-</p>
-
-<br>
-
-<p align="center">
-  <img src="docs/Images/Settings.jpeg" width="220" alt="Settings">
-  <img src="docs/Images/About.jpeg" width="220" alt="About">
-</p>
-
-<p align="center">
-  <strong>Settings</strong>
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  <strong>About</strong>
-</p>
+| Settings | About |
+|:---:|:---:|
+| <img src="docs/Images/Settings.jpeg" width="220" alt="Settings"> | <img src="docs/Images/About.jpeg" width="220" alt="About"> |
 
 ---
 
 ## Download
 
-<p align="center">
-
-<strong>Status</strong>
-
-Ready to download and install.
-
-</p>
-
-<p align="center">
+**Status:** Ready to download and install.
 
 The application is distributed as an APK and supports Android 8.0 (API 26) and above.
-
-</p>
 
 <p align="center">
   <a href="https://github.com/a7x-rudolf/Cashflow-Family/releases/download/v1.0.0/Cashflow.Family.v1.0.0.apk">
