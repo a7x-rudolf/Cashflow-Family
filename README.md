@@ -5,11 +5,10 @@
 **Family Financial Management Application**
 
 [![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/a7x-rudolf/Cashflow-Family/releases/tag/v1.0.0)
-[![Platform](https://img.shields.io/badge/platform-Android-3DDC84.svg)](https://developer.android.com/)
-[![Kotlin](https://img.shields.io/badge/Kotlin-1.9.0-7F52FF.svg)](https://kotlinlang.org/)
-[![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-2024.10.00-4285F4.svg)](https://developer.android.com/compose)
-[![License](https://img.shields.io/badge/license-Proprietary-red.svg)](LICENSE)
-[![Status](https://img.shields.io/badge/status-Production%20Ready-brightgreen.svg)]()
+[![Platform](https://img.shields.io/badge/platform-Android-3DDC84.svg)](https://developer.android.com/about)
+[![Kotlin](https://img.shields.io/badge/Kotlin-1.9.0-7F52FF.svg)](https://github.com/JetBrains/kotlin/releases/tag/v1.9.0)
+[![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-2024.10.00-4285F4.svg)](https://developer.android.com/jetpack/androidx/releases/compose#2024.10.00)
+[![License](https://img.shields.io/badge/license-Proprietary-red.svg)](https://github.com/a7x-rudolf/Cashflow-Family/blob/main/LICENSE)
 
 *A comprehensive family financial management app that helps manage income, expenses, and monthly budgets together in one application.*
 
