@@ -4,7 +4,7 @@
 
 **Family Financial Management Application**
 
-[![Version](https://img.shields.io/badge/version-1.0.1-blue.svg)](https://github.com/a7x-rudolf/Cashflow-Family/releases/tag/v1.0.1)
+[![Version](https://img.shields.io/badge/version-1.0.1-blue.svg)](https://github.com/a7x-rudolf/Cashflow-Family/releases/tag/v.1.0.1)
 [![Platform](https://img.shields.io/badge/platform-Android-3DDC84.svg)](https://developer.android.com/about)
 [![Kotlin](https://img.shields.io/badge/Kotlin-1.9.0-7F52FF.svg)](https://github.com/JetBrains/kotlin/releases/tag/v1.9.0)
 [![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-2024.10.00-4285F4.svg)](https://developer.android.com/jetpack/androidx/releases/compose#2024.10.00)
