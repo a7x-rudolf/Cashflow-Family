@@ -40,11 +40,11 @@ Project ini memerlukan konfigurasi Firebase pribadi dan keystore penandatanganan
 
 | Home (Beranda) | Add Transaction | History |
 | :---: | :---: | :---: |
-| ![Home](docs/images/Home.jpeg) | ![Add Transaction](docs/images/Add%20Transaction.jpeg) | ![History](docs/images/History.jpeg) |
+| ![Home](docs/Images/Home.jpeg) | ![Add Transaction](docs/Images/Add%20Transaction.jpeg) | ![History](docs/mages/History.jpeg) |
 
 | Settings | About |
 | :---: | :---: |
-| ![Settings](docs/images/Settings.jpeg) | ![About](docs/images/About.jpeg) |
+| ![Settings](docs/Images/Settings.jpeg) | ![About](docs/Images/About.jpeg) |
 
 ## Download dan Instalasi
 
