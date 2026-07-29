@@ -1,1 +1,86 @@
-/build
+# ==============================================================
+# ANDROID STUDIO / IDE FILES
+# ==============================================================
+*.iml
+.idea/caches
+.idea/libraries
+.idea/modules.xml
+.idea/workspace.xml
+.idea/navEditor.xml
+.idea/assetWizardSettings.xml
+.idea/deploymentTargetSelector.xml
+.idea/deviceManager.xml
+
+# ==============================================================
+# GRADLE
+# ==============================================================
+.gradle/
+build/
+captures/
+*.hprof
+
+# ==============================================================
+# NATIVE BUILD
+# ==============================================================
+.externalNativeBuild
+.cxx
+
+# ==============================================================
+# OS FILES
+# ==============================================================
+.DS_Store
+Thumbs.db
+
+# ==============================================================
+# SENSITIVE FILES (SECURITY)
+# ==============================================================
+
+# Local configuration (contains SDK path, keystore passwords)
+local.properties
+
+# Keystore files
+*.jks
+*.keystore
+
+# Firebase config (contains API keys)
+google-services.json
+
+# ==============================================================
+# BUILD OUTPUTS
+# ==============================================================
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# ==============================================================
+# LOG & TEMP FILES
+# ==============================================================
+*.log
+*.log.*
+*~
+.kotlin/
+gradle.properties~
+
+# ==============================================================
+# AI / TOOL ARTIFACTS
+# ==============================================================
+.artifacts/
+
+# ==============================================================
+# TEST OUTPUTS
+# ==============================================================
+/test-results/
+/reports/
+
+# Firebase Admin SDK service account (SANGAT SENSITIF - jangan pernah commit!)
+*firebase-adminsdk*.json
+*serviceAccountKey*.json
+
+# Node dependencies
+node_modules/
+functions/node_modules/
+
+# push-server is its own separate repo/deployment (cashflow-push-server on GitHub),
+# not part of this Android project
+push-server/
