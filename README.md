@@ -38,13 +38,18 @@ Project ini memerlukan konfigurasi Firebase pribadi dan keystore penandatanganan
 
 ## Tampilan Antarmuka (Screenshots)
 
-| Home (Beranda) | Add Transaction | History |
-| :---: | :---: | :---: |
-| ![Home](docs/Images/Home.jpeg) | ![Add Transaction](docs/Images/Add%20Transaction.jpeg) | ![History](docs/mages/History.jpeg) |
+### Home | Add Transaction | History
+<p align="center">
+  <img src="docs/Images/Home.jpeg" width="30%" alt="Home" />
+  <img src="docs/Images/Add%20Transaction.jpeg" width="30%" alt="Add Transaction" />
+  <img src="docs/Images/History.jpeg" width="30%" alt="History" />
+</p>
 
-| Settings | About |
-| :---: | :---: |
-| ![Settings](docs/Images/Settings.jpeg) | ![About](docs/Images/About.jpeg) |
+### Settings | About
+<p align="center">
+  <img src="docs/Images/Settings.jpeg" width="30%" alt="Settings" />
+  <img src="docs/Images/About.jpeg" width="30%" alt="About" />
+</p>
 
 ## Download dan Instalasi
 
