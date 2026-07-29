@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--suppress XmlUnusedNamespaceDeclaration -->
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <external-files-path
+        name="exports"
+        path="exports/" />
+
+    <external-files-path
+        name="backups"
+        path="backups/" />
+
+    <cache-path
+        name="cache"
+        path="." />
+
+    <external-files-path
+        name="downloads"
+        path="Download/" />
+
+    <external-files-path
+        name="root"
+        path="." />
+
+    <external-path
+        name="external"
+        path="." />
+</paths>
