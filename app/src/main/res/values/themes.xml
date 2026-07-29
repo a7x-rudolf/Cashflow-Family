@@ -1,0 +1,18 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Splash Screen Theme -->
+    <style name="Theme.CashflowFamily" parent="Theme.SplashScreen">
+        <!-- Splash Screen Attributes -->
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/logo_cashflow</item>
+        <item name="windowSplashScreenAnimationDuration">400</item>
+        <item name="postSplashScreenTheme">@style/Theme.CashflowFamily.Main</item>
+    </style>
+
+    <!-- Main App Theme (setelah splash) -->
+    <style name="Theme.CashflowFamily.Main" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+
+</resources>

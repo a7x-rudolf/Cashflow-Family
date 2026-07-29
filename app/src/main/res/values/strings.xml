@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Cashflow Family</string>
+    <!-- Web Client ID (type 3) dari app/google-services.json, dipakai untuk Google Sign-In via Credential Manager -->
+    <string name="default_web_client_id" translatable="false">363672901409-dsh7qp1tc8fijcn0voh1o0clf2sjtmmu.apps.googleusercontent.com</string>
+</resources>

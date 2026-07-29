@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "363672901409",
+    "project_id": "cashflow-family-20262",
+    "storage_bucket": "cashflow-family-20262.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:363672901409:android:9d6f72516d639dc0205060",
+        "android_client_info": {
+          "package_name": "com.app.cashflowfamily"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "363672901409-0bfjk472kn9qre73nfpqqek0unqo6nh9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.app.cashflowfamily",
+            "certificate_hash": "ae9db847ac8ce761c5a21fd36ff9b886c53ff3ca"
+          }
+        },
+        {
+          "client_id": "363672901409-j7urhf2vnduh0279n12r8kt1bsa5une9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.app.cashflowfamily",
+            "certificate_hash": "f1d709d098fa43d545c764ef148bf9a22e3a61e1"
+          }
+        },
+        {
+          "client_id": "363672901409-dsh7qp1tc8fijcn0voh1o0clf2sjtmmu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAfOiaSykbEaODi3062P_98hShwH2NbcSo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "363672901409-dsh7qp1tc8fijcn0voh1o0clf2sjtmmu.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
