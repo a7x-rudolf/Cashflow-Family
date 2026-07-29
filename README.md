@@ -1,58 +1,63 @@
 # Cashflow Family — Android
 
-> 📱 Ini adalah versi **Android** dari aplikasi Cashflow Family — aplikasi manajemen keuangan keluarga.
+> Ini adalah versi Android dari aplikasi Cashflow Family — aplikasi manajemen keuangan keluarga.
 
 Cashflow Family membantu keluarga mengelola pemasukan, pengeluaran, dan budget bulanan bersama-sama dalam satu aplikasi.
 
-## Fitur
+## Fitur Utama
 
-- 💰 Catat transaksi (pemasukan & pengeluaran) dengan kategori
-- 👨‍👩‍👧 Kelola keluarga — undang anggota lewat kode undangan
-- 📊 Budget bulanan per kategori
-- 🔁 Transaksi berulang (recurring) untuk gaji, tagihan, langganan
-- 🔔 Notifikasi pengingat harian & peringatan budget
-- 🔐 Login dengan fingerprint/biometric
-- 📈 Analitik & laporan pengeluaran keluarga
+- Pencatatan Transaksi: Catat pemasukan dan pengeluaran harian dengan kategori terstruktur.
+- Kolaborasi Keluarga: Undang anggota keluarga menggunakan kode unik untuk memantau keuangan bersama.
+- Anggaran Bulanan: Tetapkan dan pantau batas budget per kategori agar pengeluaran tetap terkontrol.
+- Transaksi Berulang (Recurring): Otomatisasi pencatatan untuk gaji, tagihan bulanan, atau langganan rutin.
+- Notifikasi dan Pengingat: Dapatkan pengingat harian serta peringatan jika budget mulai menipis.
+- Keamanan Biometrik: Dukungan login menggunakan kunci sidik jari atau enkripsi lokal yang aman.
+- Analitik dan Laporan: Visualisasi data keuangan dalam bentuk grafik yang interaktif dan mudah dibaca.
 
 ## Tech Stack
 
-- **Kotlin** + **Jetpack Compose**
-- **Hilt** untuk dependency injection
-- **Firebase / Firestore** sebagai backend (users, families, transactions, budgets, recurring_transactions)
-- **MVVM** architecture
+- UI Framework: Jetpack Compose (Modern Declarative UI)
+- Architecture: MVVM (Model-View-ViewModel) + Repository Pattern
+- Dependency Injection: Hilt
+- Backend dan Database: Firebase (Firestore, Authentication, Cloud Messaging)
+- Language: 100% Kotlin
 
-## Setup
+## Panduan Setup Lokal
 
-Project ini membutuhkan file konfigurasi Firebase (`app/google-services.json`) dan keystore signing yang **tidak** disertakan di repo ini karena alasan keamanan. Untuk menjalankan project:
+Project ini memerlukan konfigurasi Firebase pribadi dan keystore penandatanganan untuk alasan keamanan. Ikuti langkah berikut untuk menjalankan project di komputer lokal:
 
-1. Buat project Firebase sendiri di [Firebase Console](https://console.firebase.google.com/)
-2. Download `google-services.json` dan taruh di folder `app/`
-3. Isi `local.properties` dengan lokasi Android SDK kamu
+1. Clone repository ini:
+   git clone https://github.com/a7x-rudolf/Cashflow-Family.git
+2. Konfigurasi Firebase:
+   - Buat project baru melalui Firebase Console.
+   - Unduh file google-services.json dan letakkan di dalam folder app/.
+3. Konfigurasi Lokal:
+   - Sesuaikan path direktori Android SDK Anda di dalam file local.properties.
+4. Build dan Run:
+   - Buka project menggunakan Android Studio dan sinkronkan dengan Gradle.
 
-## Tampilan Aplikasi
+## Tampilan Antarmuka (Screenshots)
 
-| Beranda | Riwayat Transaksi | Tambah Transaksi |
-|---|---|---|
-| ![Beranda](docs/screenshots/beranda.jpeg) | ![Riwayat](docs/screenshots/riwayat.jpeg) | ![Tambah Transaksi](docs/screenshots/tambah-transaksi.jpeg) |
+| Home (Beranda) | Add Transaction | History |
+| :---: | :---: | :---: |
+| ![Home](docs/images/Home.jpeg) | ![Add Transaction](docs/images/Add%20Transaction.jpeg) | ![History](docs/images/History.jpeg) |
 
-| Budget Bulanan | Transaksi Berulang | Keluarga |
-|---|---|---|
-| ![Budget](docs/screenshots/budget.jpeg) | ![Recurring](docs/screenshots/recurring.jpeg) | ![Keluarga](docs/screenshots/keluarga.jpeg) |
+| Settings | About |
+| :---: | :---: |
+| ![Settings](docs/images/Settings.jpeg) | ![About](docs/images/About.jpeg) |
 
-| Setelan | Promo |
-|---|---|
-| ![Setelan](docs/screenshots/setelan.jpeg) | ![Promo](docs/screenshots/promo.jpeg) |
+## Download dan Instalasi
 
-## Status
+Anda dapat mengunduh versi stabil terbaru aplikasi ini langsung melalui halaman rilis repository:
 
-Ready to Download & install
+[Unduh Cashflow Family APK (Latest Release)](https://github.com/a7x-rudolf/Cashflow-Family/releases/latest)
 
-[📥(https://github.com/a7x-rudolf/Cashflow-Family/releases/latest)](https://github.com/a7x-rudolf/Cashflow-Family/releases/download/v1.0.0/Cashflow.Family.apk)
+## License dan Kebijakan Hak Cipta
 
-## License
+Lihat detail lengkap pada file [LICENSE](LICENSE).
 
-Lihat file [LICENSE](LICENSE). Kode ini bisa dilihat siapa saja untuk keperluan portofolio/referensi, tapi **tidak boleh dipakai ulang, dimodifikasi, atau didistribusikan** tanpa izin tertulis dari pemilik.
+Repository ini dipublikasikan untuk keperluan portofolio dan referensi edukasi. Tidak diizinkan untuk mendistribusikan ulang, memodifikasi secara komersial, atau mengklaim ulang tanpa izin tertulis dari pembuat.
 
 ---
 
-Dibuat oleh [Ridolf Widi Alfisa Lumba](https://github.com/a7x-rudolf)
+Dibuat oleh Ridolf Widi Alfisa Lumba (https://github.com/a7x-rudolf)
