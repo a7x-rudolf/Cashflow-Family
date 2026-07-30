@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
@@ -62,63 +63,41 @@ fun BalanceCard(
 
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(28.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color.Transparent
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Box(
             modifier = Modifier
                 .background(
                     brush = Brush.linearGradient(
-                        colors = listOf(
-                            BalanceCardGradientStart,
-                            BalanceCardGradientMid,
-                            BalanceCardGradientEnd
-                        )
+                        0.0f to BalanceCardGradientStart,
+                        0.5f to BalanceCardGradientMid,
+                        1.0f to BalanceCardGradientEnd,
                     )
                 )
         ) {
-            // Garis abstrak tipis di background -- kesan premium tapi clean,
-            // sengaja low-opacity & jumlahnya sedikit supaya tidak norak.
-            // PENTING: pakai matchParentSize(), bukan fillMaxSize(). Box ini
-            // tidak punya ukuran eksplisit (tingginya mengikuti konten Column),
-            // jadi fillMaxSize() mengukur Canvas terhadap constraint yang masuk
-            // ke Box -- bisa berbeda jauh dari tinggi Card yang sebenarnya,
-            // sehingga garis digambar di luar area yang terlihat. matchParentSize()
-            // menunggu ukuran akhir Box (dari Column) baru menyamakan ukuran Canvas.
+            // Refined abstract shapes
             Canvas(modifier = Modifier.matchParentSize()) {
                 val w = size.width
                 val h = size.height
 
-                fun archPath(yStart: Float, amplitude: Float): Path = Path().apply {
-                    moveTo(-w * 0.2f, yStart)
-                    cubicTo(
-                        w * 0.15f, yStart - amplitude,
-                        w * 0.45f, yStart + amplitude,
-                        w * 1.2f, yStart - amplitude * 0.6f
-                    )
-                }
+                drawCircle(
+                    color = Color.White.copy(alpha = 0.12f),
+                    radius = w * 0.4f,
+                    center = androidx.compose.ui.geometry.Offset(w * 0.9f, h * 0.1f)
+                )
 
-                drawPath(
-                    path = archPath(h * 0.25f, h * 0.18f),
-                    color = Color.White.copy(alpha = 0.10f),
-                    style = Stroke(width = 1.5.dp.toPx(), cap = StrokeCap.Round)
-                )
-                drawPath(
-                    path = archPath(h * 0.55f, h * 0.22f),
-                    color = Color.White.copy(alpha = 0.07f),
-                    style = Stroke(width = 1.5.dp.toPx(), cap = StrokeCap.Round)
-                )
-                drawPath(
-                    path = archPath(h * 0.85f, h * 0.15f),
-                    color = Color.White.copy(alpha = 0.05f),
-                    style = Stroke(width = 1.dp.toPx(), cap = StrokeCap.Round)
+                drawCircle(
+                    color = Color.White.copy(alpha = 0.08f),
+                    radius = w * 0.3f,
+                    center = androidx.compose.ui.geometry.Offset(w * 0.1f, h * 0.9f)
                 )
             }
 
-            Column(modifier = Modifier.padding(20.dp)) {
+            Column(modifier = Modifier.padding(24.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -128,36 +107,36 @@ fun BalanceCard(
                         Text(
                             text = if (isCurrentMonth) "Saldo Bulan Ini" else "Saldo",
                             style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f)
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White.copy(alpha = 0.85f)
                         )
 
                         Text(
                             text = DateFormatter.formatMonthYear(monthTimestamp),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color.White.copy(alpha = 0.65f)
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
                 Text(
                     text = CurrencyFormatter.formatRupiah(balance),
-                    style = TextStyle(
+                    style = MaterialTheme.typography.displayLarge.copy(
                         fontSize = balanceFontSize.sp,
-                        fontWeight = FontWeight.Bold
+                        color = Color.White
                     ),
-                    color = MaterialTheme.colorScheme.onPrimary,
                     maxLines = 1,
                     overflow = TextOverflow.Clip,
                     onTextLayout = { result ->
-                        if (result.hasVisualOverflow && balanceFontSize > 20f) {
+                        if (result.hasVisualOverflow && balanceFontSize > 22f) {
                             balanceFontSize -= 2f
                         }
                     }
                 )
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(28.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -165,9 +144,9 @@ fun BalanceCard(
                 ) {
                     IncomeExpenseItem(
                         icon = Icons.Filled.ArrowDownward,
-                        label = "Pemasukan",
+                        label = "Income",
                         amount = income,
-                        iconColor = Color(0xFF81C784),
+                        iconColor = Color(0xFF69F0AE),
                         modifier = Modifier.weight(1f)
                     )
 
@@ -175,9 +154,9 @@ fun BalanceCard(
 
                     IncomeExpenseItem(
                         icon = Icons.Filled.ArrowUpward,
-                        label = "Pengeluaran",
+                        label = "Expense",
                         amount = expense,
-                        iconColor = Color(0xFFE57373),
+                        iconColor = Color(0xFFFF8A80),
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -196,32 +175,40 @@ private fun IncomeExpenseItem(
 ) {
     Row(
         modifier = modifier
-            .clip(RoundedCornerShape(12.dp))
-            .background(MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.15f))
-            .padding(12.dp),
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color.White.copy(alpha = 0.12f))
+            .padding(vertical = 10.dp, horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = iconColor,
-            modifier = Modifier.size(20.dp)
-        )
+        Box(
+            modifier = Modifier
+                .size(32.dp)
+                .clip(CircleShape)
+                .background(Color.White.copy(alpha = 0.2f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = iconColor,
+                modifier = Modifier.size(18.dp)
+            )
+        }
 
-        Spacer(modifier = Modifier.width(8.dp))
+        Spacer(modifier = Modifier.width(10.dp))
 
         Column {
             Text(
                 text = label,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f)
+                style = MaterialTheme.typography.labelSmall,
+                color = Color.White.copy(alpha = 0.8f)
             )
 
             Text(
                 text = CurrencyFormatter.formatRupiah(amount),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onPrimary,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                color = Color.White,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )

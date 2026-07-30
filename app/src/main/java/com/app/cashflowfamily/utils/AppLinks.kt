@@ -9,5 +9,5 @@ object AppLinks {
     // Link APK release GitHub. App sudah support in-app update check,
     // jadi link versi tetap ini aman dipakai meski rilis baru datang.
     const val INVITE_APK_DOWNLOAD_URL =
-        "https://github.com/a7x-rudolf/Cashflow-Family/releases/download/v1.0.0/Cashflow.Family.v1.0.0.apk"
+        "https://github.com/a7x-rudolf/Cashflow-Family/releases/latest/download/Cashflow.Family.apk"
 }

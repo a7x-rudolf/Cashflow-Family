@@ -36,6 +36,7 @@ class FamilyActivityListener @Inject constructor(
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var listener: ListenerRegistration? = null
+    private var startJob: kotlinx.coroutines.Job? = null
     private var listenerStartTime: Long = 0L
 
     fun startListening() {
@@ -43,10 +44,11 @@ class FamilyActivityListener @Inject constructor(
 
         val currentUser = authRepository.getCurrentUser() ?: return
 
-        scope.launch {
+        startJob = scope.launch {
             try {
                 authRepository.getUserData(currentUser.uid)
                     .onSuccess { user ->
+                        if (!startJob!!.isActive) return@onSuccess
                         if (user.familyId.isEmpty()) {
                             Log.d("FamilyListener", "User has no family, skip listener")
                             return@onSuccess
@@ -55,12 +57,19 @@ class FamilyActivityListener @Inject constructor(
                         listenerStartTime = System.currentTimeMillis()
                         Log.d("FamilyListener", "Starting listener at $listenerStartTime")
 
-                        listener = transactionRepository.observeNewTransactions(
+                        val newListener = transactionRepository.observeNewTransactions(
                             familyId = user.familyId,
                             currentUserId = user.userId,
                             startTimestamp = listenerStartTime
                         ) { newTransaction ->
                             handleNewTransaction(newTransaction)
+                        }
+                        
+                        // Cek lagi apakah job dibatalkan saat kita sedang register
+                        if (startJob!!.isActive) {
+                            listener = newListener
+                        } else {
+                            newListener.remove()
                         }
                     }
                     .onFailure { error ->
@@ -73,6 +82,8 @@ class FamilyActivityListener @Inject constructor(
     }
 
     fun stopListening() {
+        startJob?.cancel()
+        startJob = null
         listener?.remove()
         listener = null
         Log.d("FamilyListener", "Listener stopped")

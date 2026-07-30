@@ -1,13 +1,13 @@
 package com.app.cashflowfamily.utils
 
 import android.util.Log
-import com.app.cashflowfamily.BuildConfig
+import com.google.firebase.BuildConfig
 
 
 @Suppress("unused")
 object AppLogger {
 
-    private val DEBUG_ENABLED = BuildConfig.DEBUG
+    private const val DEBUG_ENABLED = BuildConfig.DEBUG
 
     fun d(tag: String, message: String) {
         if (DEBUG_ENABLED) {

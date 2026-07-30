@@ -205,23 +205,23 @@ private fun copyToClipboard(context: Context, text: String) {
 // Helper: Share via intent (WhatsApp, dll)
 private fun shareFamilyCode(context: Context, familyName: String, code: String) {
     val message = """
-        🟢 *Undangan Keluarga — Cashflow Family*
+        Undangan Resmi — Cashflow Family
 
-        Halo! Anda diundang bergabung dengan keluarga *"$familyName"* di aplikasi *Cashflow Family*, untuk mengelola keuangan keluarga bersama secara rapi dan transparan.
+        Halo,
 
-        🔑 *Kode Undangan Anda:*
-        *$code*
+        Anda telah diundang untuk bergabung dengan "$familyName" di aplikasi Cashflow Family. Mari kelola keuangan keluarga bersama secara terstruktur, rapi, dan transparan.
 
-        👉 *Unduh Aplikasinya di Sini:*
-        $INVITE_APK_DOWNLOAD_URL
+        Detail Undangan:
+        • Kode Undangan: `$code`
+        • Tautan Unduh: $INVITE_APK_DOWNLOAD_URL
 
-        📋 *Langkah Bergabung:*
-        1️⃣ Unduh & pasang aplikasinya lewat tautan di atas
-        2️⃣ Daftar akun baru (atau login bila sudah punya)
-        3️⃣ Pilih menu "Gabung Keluarga"
-        4️⃣ Masukkan kode undangan di atas
+        Langkah-Langkah Bergabung:
+        1. Unduh dan pasang aplikasi melalui tautan di atas.
+        2. Buat akun baru atau masuk ke akun yang sudah ada.
+        3. Pilih menu "Gabung Keluarga" di dalam aplikasi.
+        4. Masukkan kode undangan di atas.
 
-        Ditunggu ya — yuk mulai atur keuangan keluarga bersama! 🙌
+        Terima kasih. Mari mulai kelola keuangan keluarga bersama kami.
     """.trimIndent()
 
     val shareIntent = Intent(Intent.ACTION_SEND).apply {

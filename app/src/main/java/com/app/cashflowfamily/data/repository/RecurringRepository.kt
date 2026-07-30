@@ -202,7 +202,8 @@ class RecurringRepository @Inject constructor(
         dueDate: Long
     ): Boolean {
         return try {
-            val generatedTransactionId = "recurring_${recurring.recurringId}_$dueDate"
+            val dateId = RecurringCalculator.formatDateId(dueDate)
+            val generatedTransactionId = "recurring_${recurring.recurringId}_$dateId"
 
             val transactionRef = firestore.collection("transactions")
                 .document(generatedTransactionId)

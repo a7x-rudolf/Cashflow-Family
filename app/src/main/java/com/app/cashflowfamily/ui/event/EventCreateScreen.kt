@@ -645,5 +645,5 @@ private fun AddCustomCategoryDialog(
 }
 
 private fun parseBudgetText(text: String): Double {
-    return text.replace(".", "").replace(",", "").filter { it.isDigit() }.toDoubleOrNull() ?: 0.0
+    return CurrencyFormatter.parseRupiah(text)
 }

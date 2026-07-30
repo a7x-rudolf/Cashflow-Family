@@ -25,17 +25,28 @@ val BalanceCardGradientMid = Color(0xFF4A90D9)    // = GreenPrimary
 val BalanceCardGradientEnd = Color(0xFF8ED0EA)    // = BlueSecondaryLight (terang, kesan langit)
 
 // ===== NEUTRAL =====
-val BackgroundLight = Color(0xFFF0F4FA)       // Ganti ke soft icy background
-val SurfaceLight = Color(0xFFFFFFFF)          // Tetap
-val OnBackgroundLight = Color(0xFF1A2332)     // Ganti ke dark blue-gray
-val OnSurfaceLight = Color(0xFF1A1A1A)        // Tetap
-val OutlineLight = Color(0xFFDCE4EC)          // Ganti ke soft border
+val BackgroundLight = Color(0xFFF8FAFC)       // Cleaner, soft blue-gray background
+val SurfaceLight = Color(0xFFFFFFFF)
+val SurfaceContainerLow = Color(0xFFF1F5F9)
+val SurfaceContainerHigh = Color(0xFFE2E8F0)
+val OnBackgroundLight = Color(0xFF0F172A)     // Modern Slate 900
+val OnSurfaceLight = Color(0xFF1E293B)        // Modern Slate 800
+val OutlineLight = Color(0xFFE2E8F0)          // Slate 200
 
-val BackgroundDark = Color(0xFF0D1117)        // Ganti ke dark mode dengan blue tint
-val SurfaceDark = Color(0xFF1E1E1E)           // Tetap
-val OnBackgroundDark = Color(0xFFE6EDF5)      // Ganti ke light text
-val OnSurfaceDark = Color(0xFFE0E0E0)         // Tetap
-val OutlineDark = Color(0xFF30363D)           // Ganti ke dark border
+val BackgroundDark = Color(0xFF020617)        // Very deep navy
+val SurfaceDark = Color(0xFF0F172A)           // Slate 900
+val SurfaceContainerLowDark = Color(0xFF1E293B)
+val SurfaceContainerHighDark = Color(0xFF334155)
+val OnBackgroundDark = Color(0xFFF8FAFC)
+val OnSurfaceDark = Color(0xFFF1F5F9)
+val OutlineDark = Color(0xFF1E293B)
+
+// ===== GLASSMORPHISM & GRADIENTS =====
+val GlassWhite = Color(0x33FFFFFF)
+val GlassBlack = Color(0x33000000)
+
+val PremiumGradientStart = Color(0xFF4A90D9)
+val PremiumGradientEnd = Color(0xFF5BB8D9)
 
 // ===== TEXT =====
 val TextPrimary = Color(0xFF1A2332)           // Ganti ke dark blue-gray
