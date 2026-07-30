@@ -1,27 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--suppress XmlUnusedNamespaceDeclaration -->
-<paths xmlns:android="http://schemas.android.com/apk/res/android">
+<paths>
+    <!-- Untuk download APK update (external files - app private) -->
     <external-files-path
-        name="exports"
-        path="exports/" />
+        name="downloads"
+        path="Download/" />
 
-    <external-files-path
-        name="backups"
-        path="backups/" />
+    <!-- Untuk share file export -->
+    <external-path
+        name="external_storage"
+        path="." />
 
     <cache-path
         name="cache"
         path="." />
 
-    <external-files-path
-        name="downloads"
-        path="Download/" />
-
-    <external-files-path
-        name="root"
+    <files-path
+        name="files"
         path="." />
 
-    <external-path
-        name="external"
+    <!-- Untuk kompatibilitas Android lama -->
+    <external-cache-path
+        name="external_cache"
         path="." />
 </paths>

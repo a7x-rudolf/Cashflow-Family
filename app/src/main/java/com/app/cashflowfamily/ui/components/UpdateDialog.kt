@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import com.app.cashflowfamily.utils.UpdateInfo
 import com.app.cashflowfamily.utils.UpdateManager
 
@@ -22,6 +23,8 @@ fun UpdateDialog(
     val updateManager = remember { UpdateManager(context) }
     var isDownloading by remember { mutableStateOf(false) }
     var downloadProgress by remember { mutableIntStateOf(0) }
+    var downloadComplete by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
 
     AlertDialog(
         onDismissRequest = {
@@ -29,9 +32,17 @@ fun UpdateDialog(
                 onDismiss()
             }
         },
+        properties = DialogProperties(
+            dismissOnBackPress = !isDownloading,
+            dismissOnClickOutside = !isDownloading
+        ),
         title = {
             Text(
-                text = "Update Tersedia!",
+                text = when {
+                    downloadComplete -> "Membuka Installer..."
+                    isDownloading -> "Mengunduh Update"
+                    else -> "Update Tersedia!"
+                },
                 style = MaterialTheme.typography.headlineSmall
             )
         },
@@ -39,46 +50,65 @@ fun UpdateDialog(
             Column(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text(
-                    text = "Versi terbaru: ${updateInfo.latestVersion}",
-                    style = MaterialTheme.typography.bodyLarge
-                )
-
-                if (updateInfo.apkSize > 0) {
+                if (!isDownloading) {
                     Text(
-                        text = "Ukuran: ${formatFileSize(updateInfo.apkSize)}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        text = "Versi terbaru: ${updateInfo.latestVersion}",
+                        style = MaterialTheme.typography.bodyLarge
                     )
-                }
 
-                HorizontalDivider()
+                    if (updateInfo.apkSize > 0) {
+                        Text(
+                            text = "Ukuran: ${formatFileSize(updateInfo.apkSize)}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
 
-                Text(
-                    text = "Catatan rilis:",
-                    style = MaterialTheme.typography.titleMedium
-                )
+                    HorizontalDivider()
 
-                Text(
-                    text = updateInfo.releaseNotes,
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier
-                        .heightIn(max = 150.dp)
-                        .verticalScroll(rememberScrollState())
-                )
+                    Text(
+                        text = "Catatan rilis:",
+                        style = MaterialTheme.typography.titleMedium
+                    )
 
-                if (isDownloading) {
+                    Text(
+                        text = updateInfo.releaseNotes,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier
+                            .heightIn(max = 150.dp)
+                            .verticalScroll(rememberScrollState())
+                    )
+                } else {
                     Spacer(modifier = Modifier.height(8.dp))
+
                     LinearProgressIndicator(
                         progress = { downloadProgress.toFloat() / 100 },
                         modifier = Modifier.fillMaxWidth()
                     )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
                     Text(
-                        text = "Mengunduh... $downloadProgress%",
-                        style = MaterialTheme.typography.bodySmall,
+                        text = if (downloadComplete) {
+                            "Download selesai! Installer akan terbium..."
+                        } else {
+                            "$downloadProgress% - Mohon tunggu..."
+                        },
+                        style = MaterialTheme.typography.bodyMedium,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
                     )
+
+                    if (errorMessage != null) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = errorMessage!!,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                 }
             }
         },
@@ -87,30 +117,27 @@ fun UpdateDialog(
                 Button(
                     onClick = {
                         isDownloading = true
+                        downloadProgress = 0
+                        errorMessage = null
                         onDownloadStart()
+
                         updateManager.downloadAndInstall(
                             downloadUrl = updateInfo.downloadUrl,
                             onProgress = { progress ->
                                 downloadProgress = progress
                             },
                             onComplete = {
-                                isDownloading = false
-                                onDismiss()
+                                downloadComplete = true
+                                // Dialog akan tetap terbuka sebentar sampai installer muncul
                             },
-                            onError = { _ ->
+                            onError = { error ->
                                 isDownloading = false
+                                errorMessage = error
                             }
                         )
                     }
                 ) {
                     Text("Update Sekarang")
-                }
-            } else {
-                Button(
-                    onClick = {},
-                    enabled = false
-                ) {
-                    Text("Mengunduh...")
                 }
             }
         },

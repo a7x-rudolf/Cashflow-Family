@@ -1,6 +1,7 @@
 package com.app.cashflowfamily.ui.transaction
 
 import android.widget.Toast
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -13,6 +14,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Category
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -20,6 +22,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -62,6 +65,7 @@ fun AddTransactionScreen(
     var description by remember { mutableStateOf("") }
     var selectedDate by remember { mutableLongStateOf(System.currentTimeMillis()) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    var showCategorySheet by remember { mutableStateOf(false) }
 
     val saveState by viewModel.saveState.collectAsState()
     val scrollState = rememberScrollState()
@@ -165,16 +169,44 @@ fun AddTransactionScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Category
-                CategoryDropdown(
-                    categories = Categories.getCategories(transactionType),
-                    selectedCategory = category,
-                    onCategorySelected = {
-                        category = it
-                        errorMessage = null
+                // Category (Modern Picker)
+                OutlinedTextField(
+                    value = category,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Kategori") },
+                    placeholder = { Text("Pilih Kategori") },
+                    trailingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Category,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
                     },
-                    isError = errorMessage != null && category.isEmpty()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { showCategorySheet = true },
+                    enabled = false, // Supaya bisa diklik seluruh areanya lewat Modifier.clickable
+                    colors = OutlinedTextFieldDefaults.colors(
+                        disabledBorderColor = if (errorMessage != null && category.isEmpty()) 
+                            MaterialTheme.colorScheme.error 
+                        else MaterialTheme.colorScheme.outline,
+                        disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        disabledTextColor = MaterialTheme.colorScheme.onSurface
+                    )
                 )
+
+                if (showCategorySheet) {
+                    com.app.cashflowfamily.ui.components.CategoryPickerSheet(
+                        transactionType = transactionType,
+                        selectedCategory = category,
+                        onCategorySelected = {
+                            category = it
+                            errorMessage = null
+                        },
+                        onDismiss = { showCategorySheet = false }
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(16.dp))
 

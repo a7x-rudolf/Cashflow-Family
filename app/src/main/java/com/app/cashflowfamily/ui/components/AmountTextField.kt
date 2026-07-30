@@ -23,17 +23,37 @@ fun AmountTextField(
     OutlinedTextField(
         value = value,
         onValueChange = { input ->
-            // Hanya terima angka
-            val cleaned = input.filter { it.isDigit() }
+            // Izinkan angka dan satu pemisah desimal (koma untuk ID)
+            val filtered = input.filter { it.isDigit() || it == ',' }
+            
+            // Pastikan hanya ada satu koma
+            val firstCommaIndex = filtered.indexOf(',')
+            val cleaned = if (firstCommaIndex != -1) {
+                val beforeComma = filtered.substring(0, firstCommaIndex + 1)
+                val afterComma = filtered.substring(firstCommaIndex + 1).replace(",", "")
+                beforeComma + afterComma
+            } else {
+                filtered
+            }
 
             if (cleaned.isEmpty()) {
                 onValueChange("")
             } else {
-                // Format dengan titik ribuan
-                val number = cleaned.toLongOrNull() ?: 0L
-                val formatted = NumberFormat.getNumberInstance(Locale("in", "ID"))
-                    .format(number)
-                onValueChange(formatted)
+                // Format bagian sebelum koma dengan pemisah ribuan
+                val parts = cleaned.split(",")
+                val integerPart = parts[0].toLongOrNull() ?: 0L
+                val formattedInteger = NumberFormat.getNumberInstance(Locale("id", "ID"))
+                    .format(integerPart)
+                
+                val finalValue = if (parts.size > 1) {
+                    "$formattedInteger,${parts[1]}"
+                } else if (cleaned.endsWith(",")) {
+                    "$formattedInteger,"
+                } else {
+                    formattedInteger
+                }
+                
+                onValueChange(finalValue)
             }
         },
         label = { Text("Jumlah") },

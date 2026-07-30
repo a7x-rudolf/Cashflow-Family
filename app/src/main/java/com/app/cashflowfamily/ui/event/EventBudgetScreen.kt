@@ -510,9 +510,23 @@ private fun CategoryFormDialog(
                 OutlinedTextField(
                     value = budgetText,
                     onValueChange = { input ->
-                        val digits = input.filter { it.isDigit() }.take(15)
-                        budgetText = if (digits.isNotBlank()) {
-                            CurrencyFormatter.formatInput(digits.toLongOrNull() ?: 0L)
+                        val filtered = input.filter { it.isDigit() || it == ',' }
+                        val firstComma = filtered.indexOf(',')
+                        val cleaned = if (firstComma != -1) {
+                            filtered.substring(0, firstComma + 1) + 
+                            filtered.substring(firstComma + 1).replace(",", "")
+                        } else filtered
+
+                        budgetText = if (cleaned.isNotBlank()) {
+                            if (cleaned.endsWith(",")) {
+                                val num = cleaned.dropLast(1).toLongOrNull() ?: 0L
+                                CurrencyFormatter.formatInput(num) + ","
+                            } else {
+                                val parts = cleaned.split(",")
+                                val num = parts[0].toLongOrNull() ?: 0L
+                                val formatted = CurrencyFormatter.formatInput(num)
+                                if (parts.size > 1) "$formatted,${parts[1]}" else formatted
+                            }
                         } else ""
                     },
                     label = { Text("Budget") },
@@ -563,8 +577,7 @@ private fun CategoryFormDialog(
         confirmButton = {
             TextButton(
                 onClick = {
-                    val budget = budgetText.replace(".", "").replace(",", "")
-                        .filter { it.isDigit() }.toDoubleOrNull() ?: 0.0
+                    val budget = CurrencyFormatter.parseRupiah(budgetText)
                     if (name.isNotBlank()) onConfirm(name, selectedIconKey, budget)
                 },
                 enabled = name.isNotBlank()

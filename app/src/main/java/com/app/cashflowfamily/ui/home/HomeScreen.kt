@@ -1,6 +1,7 @@
 package com.app.cashflowfamily.ui.home
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +19,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Message
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Insights
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Notifications
@@ -49,6 +51,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -75,37 +78,27 @@ fun HomeScreen(
     bottomNavController: NavController,
     homeViewModel: HomeViewModel = hiltViewModel(),
     recurringViewModel: com.app.cashflowfamily.viewmodel.RecurringViewModel = hiltViewModel(),
-    notificationViewModel: NotificationViewModel = hiltViewModel()  // Akan di-pass dari MainScreen
+    notificationViewModel: NotificationViewModel = hiltViewModel()
 ) {
     val uiState by homeViewModel.uiState.collectAsState()
     val notificationUiState by notificationViewModel.uiState.collectAsState()
 
-    // State: halaman yang aktif di pager
     var selectedPageIndex by remember { mutableIntStateOf(0) }
     var expanded by remember { mutableStateOf(false) }
 
-    // ===== LISTENER SUDAH DI-START DI MAINSCREEN =====
-    // Tidak perlu start/stop listener di sini lagi
-
-    // Update selectedPageIndex saat data ter-load pertama kali
     androidx.compose.runtime.LaunchedEffect(uiState.monthDataList.size) {
         if (uiState.monthDataList.isNotEmpty() && selectedPageIndex == 0) {
             selectedPageIndex = uiState.monthDataList.size - 1
         }
     }
 
-    // Data bulan yang sedang aktif
     val currentMonthData = uiState.monthDataList.getOrNull(selectedPageIndex)
 
-    // Auto-refresh saat kembali ke Home screen
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
                 homeViewModel.refresh()
-                // Unread count akan otomatis update via real-time listener
-
-                // Process recurring transactions
                 recurringViewModel.processDueRecurrings { count ->
                     if (count > 0) {
                         homeViewModel.refresh()
@@ -172,7 +165,6 @@ fun HomeScreen(
                     }
                 },
                 actions = {
-                    // ===== 1. NOTIFIKASI dengan Badge =====
                     Box(
                         modifier = Modifier
                             .padding(end = 2.dp)
@@ -212,7 +204,6 @@ fun HomeScreen(
                         }
                     }
 
-                    // ===== 2. TITIK TIGA (⋮) =====
                     Box(
                         modifier = Modifier
                             .padding(end = 8.dp)
@@ -289,9 +280,6 @@ fun HomeScreen(
                 )
             )
         }
-        // Tombol "Tambah Transaksi" dipindahkan ke bottom navigation bar
-        // (lihat MainScreen.FloatingBottomBar) supaya tidak lagi menutupi
-        // list transaksi di halaman Beranda.
     ) { paddingValues ->
         Box(
             modifier = Modifier
@@ -308,15 +296,6 @@ fun HomeScreen(
             } else {
                 val currentTransactions = currentMonthData?.transactions ?: emptyList()
 
-                // ===== SATU LazyColumn UNTUK SELURUH HALAMAN =====
-                // Card saldo + header "Transaksi" dijadikan item di dalam list
-                // yang sama (bukan Column terpisah dengan tinggi fixed) supaya:
-                //  1. Konsisten di semua ukuran/densitas layar -- proporsi
-                //     ruang untuk saldo vs daftar transaksi tidak lagi
-                //     hardcoded, semuanya ikut scroll bersamaan.
-                //  2. Di layar pendek, list transaksi tidak lagi "kepotong"
-                //     cuma nyisa 1-2 item karena harus berbagi ruang dengan
-                //     area fixed di atasnya -- sekarang user tinggal scroll.
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
@@ -333,9 +312,24 @@ fun HomeScreen(
                         )
                     }
 
-                    // Card insight (wave chart pemasukan vs pengeluaran) --
-                    // otomatis mengikuti bulan yang sedang aktif di atas,
-                    // karena dihitung dari currentMonthData yang sama.
+                    item {
+                        Spacer(modifier = Modifier.height(20.dp))
+                        QuickActionBar(
+                            onBudgetClick = { rootNavController.navigate(Screen.Budget.route) },
+                            onRecurringClick = { rootNavController.navigate(Screen.RecurringList.route) },
+                            onAnalyticsClick = { rootNavController.navigate(Screen.Analytics.route) },
+                            onEventsClick = { 
+                                bottomNavController.navigate(Screen.EventList.route) {
+                                    popUpTo(bottomNavController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            }
+                        )
+                    }
+
                     currentMonthData?.let { monthData ->
                         item {
                             Spacer(modifier = Modifier.height(16.dp))
@@ -442,11 +436,88 @@ fun HomeScreen(
                     }
 
                     item {
-                        // Sedikit ruang di bawah list (FAB sudah dipindahkan ke bottom navbar)
                         Spacer(modifier = Modifier.height(24.dp))
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun QuickActionBar(
+    onBudgetClick: () -> Unit,
+    onRecurringClick: () -> Unit,
+    onAnalyticsClick: () -> Unit,
+    onEventsClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        QuickActionItem(
+            icon = Icons.Filled.Wallet,
+            label = "Budget",
+            onClick = onBudgetClick,
+            color = Color(0xFF4A90D9)
+        )
+        QuickActionItem(
+            icon = Icons.Filled.Receipt,
+            label = "Rutin",
+            onClick = onRecurringClick,
+            color = Color(0xFF5BB8D9)
+        )
+        QuickActionItem(
+            icon = Icons.Filled.Insights,
+            label = "Analisis",
+            onClick = onAnalyticsClick,
+            color = Color(0xFF81C784)
+        )
+        QuickActionItem(
+            icon = Icons.Filled.CalendarMonth,
+            label = "Event",
+            onClick = onEventsClick,
+            color = Color(0xFFFBC02D)
+        )
+    }
+}
+
+@Composable
+private fun QuickActionItem(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    onClick: () -> Unit,
+    color: Color
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.clickable(
+            interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+            indication = null,
+            onClick = onClick
+        )
+    ) {
+        Surface(
+            shape = CircleShape,
+            color = color.copy(alpha = 0.12f),
+            modifier = Modifier.size(52.dp)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = label,
+                    tint = color,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)
+        )
     }
 }

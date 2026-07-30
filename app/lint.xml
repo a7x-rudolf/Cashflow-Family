@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <!-- ===== PLAY STORE POLICY WARNINGS (untuk app di-distribute via GitHub) ===== -->
+    <issue id="ProtectedPermissions" severity="ignore" />
+
+    <!-- ===== ANDROID 16+ ORIENTATION WARNINGS (app mobile-first portrait) ===== -->
+    <issue id="LockedOrientationActivity" severity="ignore" />
+    <issue id="DiscouragedApi" severity="ignore" />
+
+    <!-- ===== SDK VERSION CHECK WARNINGS (minSdk = 26) ===== -->
+    <issue id="ObsoleteSdkInt" severity="ignore" />
+</lint>

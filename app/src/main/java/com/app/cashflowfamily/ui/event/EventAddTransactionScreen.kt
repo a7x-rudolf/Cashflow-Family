@@ -66,8 +66,7 @@ fun EventAddTransactionScreen(
     }
 
     val selectedCategory = uiState.categories.find { it.categoryId == selectedCategoryId }
-    val amountValue = amountText.replace(".", "").replace(",", "")
-        .filter { it.isDigit() }.toDoubleOrNull() ?: 0.0
+    val amountValue = CurrencyFormatter.parseRupiah(amountText)
 
     fun submitTransaction() {
         viewModel.addTransaction(
@@ -347,9 +346,26 @@ fun EventAddTransactionScreen(
             OutlinedTextField(
                 value = amountText,
                 onValueChange = { input ->
-                    val digits = input.filter { it.isDigit() }.take(15)
-                    amountText = if (digits.isNotBlank()) {
-                        CurrencyFormatter.formatInput(digits.toLongOrNull() ?: 0L)
+                    // Izinkan desimal (koma)
+                    val filtered = input.filter { it.isDigit() || it == ',' }
+                    val firstComma = filtered.indexOf(',')
+                    val cleaned = if (firstComma != -1) {
+                        filtered.substring(0, firstComma + 1) + 
+                        filtered.substring(firstComma + 1).replace(",", "")
+                    } else filtered
+
+                    amountText = if (cleaned.isNotBlank()) {
+                        // Untuk input event, kita gunakan format helper yang sama
+                        // tapi karena ini custom field, kita adaptasi logikanya
+                        if (cleaned.endsWith(",")) {
+                            val num = cleaned.dropLast(1).toLongOrNull() ?: 0L
+                            CurrencyFormatter.formatInput(num) + ","
+                        } else {
+                            val parts = cleaned.split(",")
+                            val num = parts[0].toLongOrNull() ?: 0L
+                            val formatted = CurrencyFormatter.formatInput(num)
+                            if (parts.size > 1) "$formatted,${parts[1]}" else formatted
+                        }
                     } else ""
                 },
                 label = { Text("Jumlah *") },

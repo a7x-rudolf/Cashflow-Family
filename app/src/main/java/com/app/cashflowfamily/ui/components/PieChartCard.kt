@@ -33,18 +33,18 @@ import co.yml.charts.ui.piechart.models.PieChartData
 import com.app.cashflowfamily.utils.CurrencyFormatter
 import com.app.cashflowfamily.viewmodel.CategoryData
 
-// Palette warna untuk chart
+// Premium Palette Warna Modern
 val ChartColors = listOf(
-    Color(0xFF2E7D32), // Hijau
-    Color(0xFF1565C0), // Biru
-    Color(0xFFE65100), // Orange
-    Color(0xFF6A1B9A), // Ungu
-    Color(0xFFC62828), // Merah
-    Color(0xFF00838F), // Cyan
-    Color(0xFFFF6F00), // Amber
-    Color(0xFF4E342E), // Coklat
-    Color(0xFF37474F), // Blue Grey
-    Color(0xFFAD1457)  // Pink
+    Color(0xFF4A90D9), // Blue
+    Color(0xFF81C784), // Green
+    Color(0xFFFBC02D), // Yellow
+    Color(0xFFFF8A80), // Red
+    Color(0xFFBA68C8), // Purple
+    Color(0xFF4DD0E1), // Cyan
+    Color(0xFFFFB74D), // Orange
+    Color(0xFFAED581), // Light Green
+    Color(0xFF9575CD), // Deep Purple
+    Color(0xFF4DB6AC)  // Teal
 )
 
 @Composable
@@ -141,12 +141,12 @@ private fun PieChartContent(
     )
 
     val pieChartConfig = PieChartConfig(
-        strokeWidth = 40f,
+        strokeWidth = 32f, // Thinner for elegance
         activeSliceAlpha = 0.9f,
         isAnimationEnable = true,
-        animationDuration = 800,
-        backgroundColor = MaterialTheme.colorScheme.surface,
-        chartPadding = 30,
+        animationDuration = 1000,
+        backgroundColor = Color.Transparent,
+        chartPadding = 40,
         labelVisible = false,
         showSliceLabels = false
     )
