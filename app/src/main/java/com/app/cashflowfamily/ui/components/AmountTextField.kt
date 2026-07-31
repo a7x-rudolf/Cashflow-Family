@@ -18,7 +18,8 @@ fun AmountTextField(
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
-    isError: Boolean = false
+    isError: Boolean = false,
+    keyboardOptions: KeyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
 ) {
     OutlinedTextField(
         value = value,
@@ -59,7 +60,7 @@ fun AmountTextField(
         label = { Text("Jumlah") },
         prefix = { Text("Rp  ") },
         placeholder = { Text("0") },
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        keyboardOptions = keyboardOptions,
         singleLine = true,
         isError = isError,
         textStyle = MaterialTheme.typography.titleLarge.copy(

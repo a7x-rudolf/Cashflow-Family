@@ -121,6 +121,10 @@ class AnalyticsViewModel @Inject constructor(
         processData()
     }
 
+    fun refresh() {
+        loadData()
+    }
+
     private fun processData() {
         val state = _uiState.value
         val selectedMonth = state.selectedMonth

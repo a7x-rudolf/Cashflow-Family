@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="com.app.cashflowfamily" />
-                  <option name="mobileSdkAppId" value="1:363672901409:android:9d6f72516d639dc0205060" />
-                  <option name="projectId" value="cashflow-family-20262" />
-                  <option name="projectNumber" value="363672901409" />
+                  <option name="appId" value="PLACEHOLDER" />
+                  <option name="mobileSdkAppId" value="" />
+                  <option name="projectId" value="" />
+                  <option name="projectNumber" value="" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

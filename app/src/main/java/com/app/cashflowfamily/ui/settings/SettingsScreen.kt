@@ -19,7 +19,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Backup
-import androidx.compose.material.icons.filled.CurrencyExchange
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
@@ -578,20 +577,6 @@ fun SettingsScreen(
                             ThemeMode.SYSTEM -> "Otomatis"
                         },
                         onClick = { showThemeDialog = true }
-                    )
-
-                    SettingsItem(
-                        icon = Icons.Filled.CurrencyExchange,
-                        title = "Mata Uang",
-                        subtitle = "Format nominal",
-                        trailing = "IDR",
-                        onClick = {
-                            Toast.makeText(
-                                context,
-                                "Fitur mata uang akan segera hadir",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))

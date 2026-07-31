@@ -38,10 +38,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.app.cashflowfamily.data.model.Categories
+import androidx.compose.foundation.text.KeyboardOptions
 import com.app.cashflowfamily.ui.components.AmountTextField
 import com.app.cashflowfamily.ui.components.CategoryDropdown
 import com.app.cashflowfamily.ui.components.DatePickerField
@@ -164,7 +166,11 @@ fun AddTransactionScreen(
                         amount = it
                         errorMessage = null
                     },
-                    isError = errorMessage != null && amount.isEmpty()
+                    isError = errorMessage != null && amount.isEmpty(),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Next
+                    )
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))

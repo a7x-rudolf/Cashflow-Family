@@ -27,7 +27,6 @@ import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material.icons.filled.Wallet
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -40,6 +39,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
@@ -85,6 +86,8 @@ fun HomeScreen(
 
     var selectedPageIndex by remember { mutableIntStateOf(0) }
     var expanded by remember { mutableStateOf(false) }
+    
+    val pullToRefreshState = rememberPullToRefreshState()
 
     androidx.compose.runtime.LaunchedEffect(uiState.monthDataList.size) {
         if (uiState.monthDataList.isNotEmpty() && selectedPageIndex == 0) {
@@ -281,21 +284,19 @@ fun HomeScreen(
             )
         }
     ) { paddingValues ->
-        Box(
+        PullToRefreshBox(
+            isRefreshing = uiState.isLoading,
+            state = pullToRefreshState,
+            onRefresh = { homeViewModel.refresh() },
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            if (uiState.isLoading) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
+            if (uiState.isLoading && uiState.monthDataList.isEmpty()) {
+                com.app.cashflowfamily.ui.components.HomeShimmer()
             } else {
                 val currentTransactions = currentMonthData?.transactions ?: emptyList()
-
+                
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
