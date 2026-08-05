@@ -1,8 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendPushOnNotificationCreate = void 0;
+exports.setFamilyMemberRole = exports.kickFamilyMember = exports.sendPushOnNotificationCreate = void 0;
 const v2_1 = require("firebase-functions/v2");
 const firestore_1 = require("firebase-functions/v2/firestore");
+const https_1 = require("firebase-functions/v2/https");
 const logger = require("firebase-functions/logger");
 const admin = require("firebase-admin");
 admin.initializeApp();
@@ -74,5 +75,89 @@ exports.sendPushOnNotificationCreate = (0, firestore_1.onDocumentCreated)("notif
             logger.info(`fcmToken tidak valid dihapus untuk user ${recipientId}`);
         }
     }
+});
+exports.kickFamilyMember = (0, https_1.onCall)(async (request) => {
+    var _a;
+    const callerId = (_a = request.auth) === null || _a === void 0 ? void 0 : _a.uid;
+    if (!callerId) {
+        throw new https_1.HttpsError("unauthenticated", "Kamu harus login.");
+    }
+    const { familyId, targetUserId } = request.data;
+    if (!familyId || !targetUserId) {
+        throw new https_1.HttpsError("invalid-argument", "familyId dan targetUserId wajib diisi.");
+    }
+    if (targetUserId === callerId) {
+        throw new https_1.HttpsError("failed-precondition", "Tidak bisa kick diri sendiri, gunakan fitur 'Keluar Keluarga'.");
+    }
+    const familyRef = db.collection("families").doc(familyId);
+    const callerRef = db.collection("users").doc(callerId);
+    const targetRef = db.collection("users").doc(targetUserId);
+    await db.runTransaction(async (tx) => {
+        var _a;
+        const [familySnap, callerSnap, targetSnap] = await Promise.all([
+            tx.get(familyRef),
+            tx.get(callerRef),
+            tx.get(targetRef),
+        ]);
+        if (!familySnap.exists) {
+            throw new https_1.HttpsError("not-found", "Family tidak ditemukan.");
+        }
+        if (!callerSnap.exists) {
+            throw new https_1.HttpsError("not-found", "User pemanggil tidak ditemukan.");
+        }
+        const callerData = callerSnap.data();
+        const familyData = familySnap.data();
+        // Pemanggil harus admin DAN anggota family yang sama.
+        if (callerData.role !== "admin" || callerData.familyId !== familyId) {
+            throw new https_1.HttpsError("permission-denied", "Hanya admin keluarga ini yang boleh mengeluarkan anggota.");
+        }
+        const members = (_a = familyData.members) !== null && _a !== void 0 ? _a : [];
+        if (!members.includes(targetUserId)) {
+            throw new https_1.HttpsError("not-found", "User tersebut bukan anggota keluarga ini.");
+        }
+        // Update family.members
+        tx.update(familyRef, {
+            members: admin.firestore.FieldValue.arrayRemove(targetUserId),
+        });
+        // Reset familyId & role di dokumen user yang di-kick (kalau ada)
+        if (targetSnap.exists) {
+            tx.update(targetRef, { familyId: "", role: "member" });
+        }
+    });
+    logger.info(`Admin ${callerId} kick user ${targetUserId} dari family ${familyId}`);
+    return { success: true };
+});
+exports.setFamilyMemberRole = (0, https_1.onCall)(async (request) => {
+    var _a;
+    const callerId = (_a = request.auth) === null || _a === void 0 ? void 0 : _a.uid;
+    if (!callerId) {
+        throw new https_1.HttpsError("unauthenticated", "Kamu harus login.");
+    }
+    const { familyId, targetUserId, newRole } = request.data;
+    if (!familyId || !targetUserId || (newRole !== "admin" && newRole !== "member")) {
+        throw new https_1.HttpsError("invalid-argument", "familyId, targetUserId, dan newRole wajib valid.");
+    }
+    if (targetUserId === callerId) {
+        throw new https_1.HttpsError("failed-precondition", "Tidak bisa mengubah role diri sendiri.");
+    }
+    const callerRef = db.collection("users").doc(callerId);
+    const targetRef = db.collection("users").doc(targetUserId);
+    await db.runTransaction(async (tx) => {
+        const [callerSnap, targetSnap] = await Promise.all([tx.get(callerRef), tx.get(targetRef)]);
+        if (!callerSnap.exists || !targetSnap.exists) {
+            throw new https_1.HttpsError("not-found", "User tidak ditemukan.");
+        }
+        const callerData = callerSnap.data();
+        const targetData = targetSnap.data();
+        if (callerData.role !== "admin" || callerData.familyId !== familyId) {
+            throw new https_1.HttpsError("permission-denied", "Hanya admin keluarga ini yang boleh mengubah role anggota.");
+        }
+        if (targetData.familyId !== familyId) {
+            throw new https_1.HttpsError("failed-precondition", "User tersebut bukan anggota keluarga ini.");
+        }
+        tx.update(targetRef, { role: newRole });
+    });
+    logger.info(`Admin ${callerId} set role ${targetUserId} -> ${newRole} (family ${familyId})`);
+    return { success: true };
 });
 //# sourceMappingURL=index.js.map

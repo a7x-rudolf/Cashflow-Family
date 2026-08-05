@@ -3,6 +3,9 @@ package com.app.cashflowfamily.data.repository
 import com.app.cashflowfamily.data.model.Family
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.functions.FirebaseFunctions
+import com.google.firebase.functions.ktx.functions
+import com.google.firebase.Firebase
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -11,6 +14,11 @@ import javax.inject.Singleton
 class FamilyRepository @Inject constructor(
     private val firestore: FirebaseFirestore
 ) {
+    // SECURITY FIX (v1.1.1): kick & promote/demote sekarang lewat Cloud
+    // Function (server-side, cek role admin di server), bukan direct
+    // Firestore write dari client. Lihat functions/src/index.ts.
+    // Sesuaikan region kalau Cloud Function-mu bukan di asia-southeast2.
+    private val functions: FirebaseFunctions = Firebase.functions("asia-southeast2")
 
     // Generate kode family random (6 karakter huruf+angka)
     private fun generateFamilyCode(): String {
@@ -190,22 +198,14 @@ class FamilyRepository @Inject constructor(
         }
     }
 
-    // Kick member (hanya admin)
+    // Kick member (hanya admin) — dieksekusi & divalidasi di Cloud Function
     suspend fun kickMember(familyId: String, memberUserId: String): Result<Unit> {
         return try {
-            // Hapus dari members array
-            firestore.collection("families")
-                .document(familyId)
-                .update("members", com.google.firebase.firestore.FieldValue.arrayRemove(memberUserId))
-                .await()
-
-            // Reset familyId member yang di-kick
-            firestore.collection("users")
-                .document(memberUserId)
-                .update(
+            functions.getHttpsCallable("kickFamilyMember")
+                .call(
                     mapOf(
-                        "familyId" to "",
-                        "role" to "member"
+                        "familyId" to familyId,
+                        "targetUserId" to memberUserId
                     )
                 )
                 .await()
@@ -216,12 +216,17 @@ class FamilyRepository @Inject constructor(
         }
     }
 
-    // Promote member jadi admin
-    suspend fun promoteToAdmin(userId: String): Result<Unit> {
+    // Promote member jadi admin — dieksekusi & divalidasi di Cloud Function
+    suspend fun promoteToAdmin(familyId: String, userId: String): Result<Unit> {
         return try {
-            firestore.collection("users")
-                .document(userId)
-                .update("role", "admin")
+            functions.getHttpsCallable("setFamilyMemberRole")
+                .call(
+                    mapOf(
+                        "familyId" to familyId,
+                        "targetUserId" to userId,
+                        "newRole" to "admin"
+                    )
+                )
                 .await()
 
             Result.success(Unit)

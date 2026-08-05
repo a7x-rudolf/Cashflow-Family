@@ -585,22 +585,27 @@ fun SettingsScreen(
                     SettingsSectionHeader(title = "TENTANG")
 
                     // 1. Cek Update
-                    SettingsItem(
-                        icon = Icons.Filled.SystemUpdate,
-                        title = "Cek Update",
-                        subtitle = when {
-                            isChecking -> "Memeriksa update..."
-                            showLatestVersionStatus -> "Aplikasi sudah versi terbaru"
-                            updateInfo != null -> "Update tersedia"
-                            else -> "Periksa versi terbaru"
-                        },
-                        onClick = {
-                            if (!isChecking) {
-                                showLatestVersionStatus = false
-                                updateViewModel.checkForUpdate(silent = false)
+                    // POLICY FIX (v1.1.1): disembunyikan di build "playstore" -- update
+                    // untuk pengguna Play Store sepenuhnya lewat mekanisme Play Store,
+                    // bukan self-update. Lihat UpdateChecker.kt versi playstore flavor.
+                    if (com.app.cashflowfamily.BuildConfig.FLAVOR != "playstore") {
+                        SettingsItem(
+                            icon = Icons.Filled.SystemUpdate,
+                            title = "Cek Update",
+                            subtitle = when {
+                                isChecking -> "Memeriksa update..."
+                                showLatestVersionStatus -> "Aplikasi sudah versi terbaru"
+                                updateInfo != null -> "Update tersedia"
+                                else -> "Periksa versi terbaru"
+                            },
+                            onClick = {
+                                if (!isChecking) {
+                                    showLatestVersionStatus = false
+                                    updateViewModel.checkForUpdate(silent = false)
+                                }
                             }
-                        }
-                    )
+                        )
+                    }
 
                     // 2. Tentang Aplikasi
                     SettingsItem(

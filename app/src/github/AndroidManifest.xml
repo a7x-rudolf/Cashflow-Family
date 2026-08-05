@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Manifest khusus flavor "github". Permission ini SENGAJA hanya
+    dideklarasikan di sini, bukan di app/src/main/AndroidManifest.xml,
+    supaya build "playstore" tidak membawa permission ini sama sekali
+    (lihat catatan POLICY FIX v1.1.1 di app/build.gradle.kts).
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- ===== INSTALL APK (untuk auto-install setelah download update) ===== -->
+    <!-- Hanya untuk distribusi via GitHub Releases, BUKAN untuk build Play Store. -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+
+</manifest>

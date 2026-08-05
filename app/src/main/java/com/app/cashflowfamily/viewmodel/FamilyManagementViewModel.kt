@@ -188,10 +188,12 @@ class FamilyManagementViewModel @Inject constructor(
 
     // Promote member jadi admin
     fun promoteToAdmin(memberUserId: String, memberName: String) {
+        val family = _uiState.value.family ?: return
+
         viewModelScope.launch {
             _actionState.value = Resource.Loading
 
-            familyRepository.promoteToAdmin(memberUserId)
+            familyRepository.promoteToAdmin(family.familyId, memberUserId)
                 .onSuccess {
                     _actionState.value = Resource.Success("$memberName sekarang menjadi Admin")
                     loadFamilyData() // Refresh
