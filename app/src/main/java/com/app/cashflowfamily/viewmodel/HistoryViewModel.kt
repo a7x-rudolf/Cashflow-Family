@@ -164,12 +164,14 @@ class HistoryViewModel @Inject constructor(
             TransactionFilter.EXPENSE -> filtered.filter { it.type == "expense" }
         }
 
-        // 3. Advanced Filter: Date Range
+        // 3. Advanced Filter: Date Range (dengan normalisasi jam)
         if (state.advancedFilter.startDate != null) {
-            filtered = filtered.filter { it.date >= state.advancedFilter.startDate }
+            val startOfDay = DateFormatter.getStartOfDay(state.advancedFilter.startDate)
+            filtered = filtered.filter { it.date >= startOfDay }
         }
         if (state.advancedFilter.endDate != null) {
-            filtered = filtered.filter { it.date <= state.advancedFilter.endDate }
+            val endOfDay = DateFormatter.getEndOfDay(state.advancedFilter.endDate)
+            filtered = filtered.filter { it.date <= endOfDay }
         }
 
         // 4. Advanced Filter: Amount Range
@@ -194,13 +196,14 @@ class HistoryViewModel @Inject constructor(
             }
         }
 
-        // 7. Search Query
+        // 7. Search Query (Kategori, Deskripsi, Nama User, atau Nominal)
         if (state.searchQuery.isNotBlank()) {
             val query = state.searchQuery.lowercase().trim()
             filtered = filtered.filter { transaction ->
                 transaction.category.lowercase().contains(query) ||
                         transaction.description.lowercase().contains(query) ||
-                        transaction.userName.lowercase().contains(query)
+                        transaction.userName.lowercase().contains(query) ||
+                        transaction.amount.toString().contains(query)
             }
         }
 

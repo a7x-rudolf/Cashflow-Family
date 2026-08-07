@@ -55,6 +55,30 @@ object DateFormatter {
         }
     }
 
+    // Ambil awal hari (00:00:00.000)
+    fun getStartOfDay(timestamp: Long): Long {
+        val calendar = java.util.Calendar.getInstance().apply {
+            timeInMillis = timestamp
+            set(java.util.Calendar.HOUR_OF_DAY, 0)
+            set(java.util.Calendar.MINUTE, 0)
+            set(java.util.Calendar.SECOND, 0)
+            set(java.util.Calendar.MILLISECOND, 0)
+        }
+        return calendar.timeInMillis
+    }
+
+    // Ambil akhir hari (23:59:59.999)
+    fun getEndOfDay(timestamp: Long): Long {
+        val calendar = java.util.Calendar.getInstance().apply {
+            timeInMillis = timestamp
+            set(java.util.Calendar.HOUR_OF_DAY, 23)
+            set(java.util.Calendar.MINUTE, 59)
+            set(java.util.Calendar.SECOND, 59)
+            set(java.util.Calendar.MILLISECOND, 999)
+        }
+        return calendar.timeInMillis
+    }
+
     // Ambil awal bulan (timestamp)
     fun getStartOfMonth(timestamp: Long): Long {
         val calendar = java.util.Calendar.getInstance().apply {

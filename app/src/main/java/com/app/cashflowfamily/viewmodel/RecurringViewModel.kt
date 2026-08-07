@@ -128,6 +128,8 @@ class RecurringViewModel @Inject constructor(
             recurringRepository.addRecurring(recurring)
                 .onSuccess {
                     _actionState.value = Resource.Success("Recurring berhasil ditambahkan")
+                    // Langsung jalankan process agar transaksi pertama (jika hari ini) langsung muncul
+                    processDueRecurrings()
                     loadRecurrings()
                 }
                 .onFailure { error ->
@@ -168,18 +170,31 @@ class RecurringViewModel @Inject constructor(
      * Process due recurrings - dipanggil dari HomeScreen atau saat app aktif
      */
     fun processDueRecurrings(onComplete: (Int) -> Unit = {}) {
-        val familyId = _uiState.value.familyId
-        if (familyId.isEmpty()) {
-            onComplete(0)
-            return
-        }
-
-        if (isProcessingRecurring) {
-            onComplete(0)
-            return
-        }
-
         viewModelScope.launch {
+            if (isProcessingRecurring) {
+                onComplete(0)
+                return@launch
+            }
+
+            var familyId = _uiState.value.familyId
+
+            // Jika di state belum ada, coba ambil langsung dari repository
+            // Ini untuk menangani saat aplikasi baru terbuka dan ON_RESUME trigger lebih cepat
+            // daripada loadData() selesai.
+            if (familyId.isEmpty()) {
+                val currentUser = authRepository.getCurrentUser()
+                if (currentUser != null) {
+                    authRepository.getUserData(currentUser.uid).onSuccess { user ->
+                        familyId = user.familyId
+                    }
+                }
+            }
+
+            if (familyId.isEmpty()) {
+                onComplete(0)
+                return@launch
+            }
+
             isProcessingRecurring = true
 
             try {

@@ -29,22 +29,17 @@ android {
         minSdk = 26
         //noinspection OldTargetApi
         targetSdk = 35
-        versionCode = 12
-        versionName = "1.1.3"
+        versionCode = 13
+        versionName = "1.1.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    // SECURITY/POLICY FIX (v1.1.1): Google Play melarang app yang
-    // didistribusikan lewat Play Store untuk update dirinya sendiri lewat
-    // mekanisme di luar Play Store (lihat UpdateChecker/UpdateManager).
-    // Flavor "playstore" TIDAK menyertakan fitur itu sama sekali (kode +
-    // permission REQUEST_INSTALL_PACKAGES ada di app/src/github/ saja).
-    // Build untuk Play Store HARUS pakai flavor "playstore".
     flavorDimensions += "distribution"
     productFlavors {
         create("github") {
             dimension = "distribution"
+            buildConfigField("boolean", "IS_GITHUB_DISTRIBUTION", "true")
             buildConfigField(
                 "String",
                 "INVITE_APK_DOWNLOAD_URL",
@@ -53,8 +48,7 @@ android {
         }
         create("playstore") {
             dimension = "distribution"
-            // TODO: ganti placeholder ini dengan link Play Store asli
-            // setelah app live (lihat panduan "yang-harus-dikerjakan-sendiri.md").
+            buildConfigField("boolean", "IS_GITHUB_DISTRIBUTION", "false")
             buildConfigField(
                 "String",
                 "INVITE_APK_DOWNLOAD_URL",
@@ -162,7 +156,6 @@ dependencies {
     implementation(libs.firebase.auth.ktx)
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.firebase.messaging.ktx)
-    implementation(libs.firebase.functions.ktx)
 
     // ===== COROUTINES =====
     implementation(libs.kotlinx.coroutines.android)

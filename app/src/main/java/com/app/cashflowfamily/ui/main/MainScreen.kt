@@ -55,6 +55,7 @@ import com.app.cashflowfamily.ui.settings.SettingsScreen
 import com.app.cashflowfamily.ui.transaction.HistoryScreen
 import com.app.cashflowfamily.viewmodel.NotificationViewModel
 import com.app.cashflowfamily.viewmodel.UpdateViewModel
+import com.app.cashflowfamily.BuildConfig
 
 @Composable
 fun MainScreen(rootNavController: NavController) {
@@ -65,7 +66,9 @@ fun MainScreen(rootNavController: NavController) {
     var showUpdateDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        updateViewModel.checkForUpdate(silent = true)
+        if (BuildConfig.IS_GITHUB_DISTRIBUTION) {
+            updateViewModel.checkForUpdate(silent = true)
+        }
     }
 
     LaunchedEffect(updateInfo) {

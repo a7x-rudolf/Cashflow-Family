@@ -100,11 +100,10 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import com.app.cashflowfamily.ui.components.UserAvatar
 import com.app.cashflowfamily.utils.ImageUtils
+import com.app.cashflowfamily.BuildConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-
-// ===== TIDAK ADA IMPORT BuildConfig! =====
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -584,11 +583,8 @@ fun SettingsScreen(
                     // Tentang Section
                     SettingsSectionHeader(title = "TENTANG")
 
-                    // 1. Cek Update
-                    // POLICY FIX (v1.1.1): disembunyikan di build "playstore" -- update
-                    // untuk pengguna Play Store sepenuhnya lewat mekanisme Play Store,
-                    // bukan self-update. Lihat UpdateChecker.kt versi playstore flavor.
-                    if (com.app.cashflowfamily.BuildConfig.FLAVOR != "playstore") {
+                    // 1. Cek Update (Hanya untuk GitHub)
+                    if (BuildConfig.IS_GITHUB_DISTRIBUTION) {
                         SettingsItem(
                             icon = Icons.Filled.SystemUpdate,
                             title = "Cek Update",
@@ -619,7 +615,7 @@ fun SettingsScreen(
                     SettingsItem(
                         icon = Icons.Filled.PhoneAndroid,
                         title = "Versi Aplikasi",
-                        trailing = "v$appVersion",
+                        trailing = "v$appVersion${if (BuildConfig.IS_GITHUB_DISTRIBUTION) "" else " (Play Store)"}",
                         showArrow = false,
                         onClick = { }
                     )

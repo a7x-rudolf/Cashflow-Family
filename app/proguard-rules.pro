@@ -53,6 +53,8 @@
     <fields>;
     <init>(...);
 }
+-keep class com.app.cashflowfamily.data.model.GitHubRelease { *; }
+-keep class com.app.cashflowfamily.data.model.Asset { *; }
 -keep class com.app.cashflowfamily.data.model.Categories { *; }
 
 # Backup Data Classes (located in viewmodel package)

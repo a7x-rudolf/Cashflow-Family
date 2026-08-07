@@ -69,7 +69,7 @@ class MainActivity : FragmentActivity() {
                     .setDuration(300)
                     .withEndAction { splashScreenView.remove() }
                     .start()
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 splashScreenView.remove()
             }
         }
